@@ -1,0 +1,15 @@
+Source: pam-pgsql
+Section: admin
+Priority: extra
+Maintainer: Primoz Bratanic <primoz@slo-tech.com>
+Standards-Version: 3.6.1.1
+Build-Depends: libpam0g-dev, postgresql-dev | libpq-dev, debhelper (>= 4.0), libmhash-dev
+
+Package: libpam-pgsql
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: PAM module to authenticate using a PostgreSQL database
+ This module lets you authenticate users against a table in a PostgreSQL
+ database. It also supports checking account information and updating 
+ authentication tokens (ie. passwords).
+

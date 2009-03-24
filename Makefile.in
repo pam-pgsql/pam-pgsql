@@ -1,0 +1,58 @@
+LIBSRC=     pam_pgsql.c
+LIBOBJ=     pam_pgsql.o pam_get_pass.o pam_std_option.o pam_get_service.o
+LIBLIB=     pam_pgsql.so
+
+DISTDIR=    pam-pgsql-0.5
+ROOTDIR=	
+
+LINK=		@PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
+LDLIBS=		${LINK} -lpam -lpq @PAM_MISC_LD@ @MHASH_LD@
+INCLUDE=	@PGSQL_INC@ @MHASH_INC@
+DEBUG=      @DEBUG@
+CFLAGS=		-O2 -frename-registers -fstrict-aliasing -fPIC -DPIC -Wall -W -Wdisabled-optimization -Wredundant-decls -Wmissing-format-attribute -Wmissing-noreturn -D_GNU_SOURCE ${INCLUDE} ${DEBUG}
+
+
+all: ${LIBLIB}
+
+DISTDIRS=	debian
+DISTFILES= acconfig.h README pam_get_pass.c pam_get_service.c pam_mod_misc.h \
+	pam_pgsql.c pam_std_option.c test.c debian/changelog debian/control \
+	debian/copyright debian/dirs debian/rules Makefile.in configure.in \
+	config.h.in install-sh config.sub config.guess install-module configure \
+	CREDITS
+    
+distfiles: ${DISTFILES}
+
+${DISTDIR}.tar.gz: distfiles
+	mkdir -p ${DISTDIR}
+	for d in ${DISTDIRS}; do \
+		mkdir -p ${DISTDIR}/$$d; \
+	done
+	for f in ${DISTFILES}; do \
+		cp -pR $$f ${DISTDIR}/$$f; \
+	done
+	tar -czvvf ${DISTDIR}.tar.gz ${DISTDIR}
+	rm -rf ${DISTDIR}
+
+dist: ${DISTDIR}.tar.gz
+
+${LIBLIB}: ${LIBOBJ}
+	${CC} ${CFLAGS} ${INCLUDE} -shared -o $@ ${LIBOBJ} ${LDLIBS} 
+
+test: test.c
+	${CC} ${CFLAGS} -o $@ test.c ${LDLIBS}
+
+install:
+	@(ROOTDIR=${ROOTDIR}; ./install-module @host_os@)
+	
+clean:
+	rm -f ${LIBOBJ} ${LIBLIB} core test *~ 
+	rm -f ${DISTDIR}.tar.gz
+
+dist-clean: distclean
+distclean: clean
+	rm -f config.cache config.log config.status config.h
+	rm -f Makefile
+
+extraclean: clean
+	rm -f *.a *.o *.so *.bak 

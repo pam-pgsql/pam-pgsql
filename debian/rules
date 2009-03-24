@@ -1,0 +1,60 @@
+#!/usr/bin/make -f
+# -- Rules to build libpam-pgsql package
+
+## globals
+PACKAGE=    libpam-pgsql
+DESTDIR=    `pwd`/debian/${PACKAGE}
+INSTALL=    /usr/bin/install
+SHELL=      /bin/sh
+
+build-all: build
+build: 
+	dh_testdir
+
+	# Build the module
+	./configure
+	${MAKE}
+
+install: install-stamp
+install-stamp:
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# Install it
+	${MAKE} ROOTDIR=${DESTDIR} install
+	install -d -m 755 `pwd`/debian/${PACKAGE}/usr/share/doc/libpam-pgsql/examples
+	install -c -m 644 test.c `pwd`/debian/${PACKAGE}/usr/share/doc/libpam-pgsql/examples
+
+	touch install-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	# Clean up
+	-${MAKE} distclean
+	rm -f build-all install-stamp
+
+	dh_clean
+
+binary-indep: build install
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+
+	# Prepare & build binary package
+	dh_installdocs README CREDITS
+	dh_installchangelogs
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

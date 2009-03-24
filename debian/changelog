@@ -1,0 +1,234 @@
+pam-pgsql (0.6.5) experimental; urgency=low
+
+  * Applied session management patch (Thanks to Olivier Thauvin)
+  * Added missing include in pam_get_service.c
+  * Added RPM spec (Thanks to Jose Arthur Benetasso Villanova)
+  * Added ability to return PAM_PERM_DENIED
+
+ -- Primoz Bratanic <primoz@slo-tech.com>  Fri, 29 Aug 2008 14:02:04 +0200
+
+pam-pgsql (0.6.4) experimental; urgency=high
+
+  * Fixed http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=481970
+  * Critical security update, please upgrade
+
+ -- Primoz Bratanic <primoz@slo-tech.com>  Sun, 25 May 2008 01:43:36 +0200
+
+pam-pgsql (0.6.3) experimental; urgency=low
+
+  * typo (stlen)
+  * reupload
+
+ -- Primoz Bratanic <primoz@slo-tech.com>  Wed, 17 May 2006 00:03:06 +0200
+
+pam-pgsql (0.6.2) experimental; urgency=low
+
+  * fixed memory leak with crypt function
+  * fixed segfault with option "expired" set
+
+ -- Primoz Bratanic <primoz@slo-tech.com>  Wed, 17 May 2006 00:01:28 +0200
+
+pam-pgsql (0.6.1) experimental; urgency=low
+
+  * Added ability to reference RHOST IP in queries
+  * Changed configure.in to check for proper version of libpq
+  * Fixed one more memory leak
+  * Fixed type which prevented skiping acct part when acct is not configured
+
+ -- Primoz Bratanic <primoz@slo-tech.com>  Wed,  1 Jun 2005 19:21:14 +0200
+
+pam-pgsql (0.6) experimental; urgency=low
+
+  * Added sanity checks (now we handle the malloc failure)
+  * Removed call to free_module_options before *options has even been allocated (or set to NULL)
+  * Removed obsolete TODO file
+  * Removed obsolete public_key folder of previous maintainer
+  * Fixed some typos in documentation
+  * Added "authtok" option as an alternative to use_first_pass (to have same interface as pam_unix)
+  * Removed "oldauthtok*" options (they have no use)
+  * Removed "authtok_*" options (reverted to previous use_first_pass/try_first_pass)
+  * Fixed try/use_first_pass not to require oldauthtok (so stacking works for passwd mode)
+  * Deleted duplicated encrypt password code
+  * Removed special behaviour of std_flags (they are in options now)
+  * Major cleanup of pam_sm_authenticate
+  * Removed unneeded db connection in pam_sm_chauthtok
+  * Added new option to specify complete pgsql connection string (deprecates previous partial solutions)
+  * Added auth_query, acct_query, pwd_query (obsoletes a lot of previous partial solutions)
+  * Moved to PQexecParams (obsoletes need for data escaping)
+  * Removed multiple calls to pam_set_item (duplicated)
+  * Fixed all compile-time warnings
+  * Removed all explicit escaping
+  * Added -fstrict-aliasing -O2
+  * New config.guess, config.sub
+  * Respect PAM_DISALLOW_NULL_AUTHTOK in auth
+  * Acct returns "require new password" with PAM_DISALLOW_NULL_AUTHTOK and null auth tok
+  * Allowed additional logging query for failed or successful authentication
+  * Major cleanup of pam_sm_chauthtok
+  * Configuration now describes new options (see README)
+
+ -- Primoz Bratanic <primoz@slo-tech.com>  Wed,  1 Jun 2005 09:54:38 +0200
+
+pam-pgsql (0.5.2-9) unstable; urgency=low
+
+  * Reapplied security patches (Closes: #230875,#307784)
+  * Boolean values works with boolean type as well (Closes: #130496)
+  * Documentation typo (Closes: #218291)
+  * Reapplied other NMU patches (Closes: #307366)
+  * Allow port specification (Closes: #247536)
+  * Reapplied "Stack-Friendly patch" (Closes: #139473)
+  * Deleted wrong README.Debian (Closes: #204181)
+  * Documented host and port options (Closes: #204439)
+  * Reapplied patch to allow different config files (Closes: #236484)
+  * Reapplied patch to support another MD5 type passwords (Closes: #142889)
+  * Change "must change password" field (if any) to false after changing password
+  * Deleted build-all from root (Closes: #240823)
+  * Fixed few memory leaks (Closes: #280774)
+  * Added timeout option for database connects (Closes: #281703)
+  * Use debian/compat instead of DH_COMPAT
+  * drop DH_COMPAT and DH_VERBOSE exports from debian/rules
+  * don't ask root for password whan changing password
+  * New Maintainer (Closes: #303198)
+  * Fixed PAM stack to behave exactly as expected with use_authtok
+  * Fixed a lot of memory leaks introduced by security patches
+  * Fixed a lot of memory leaks arround returning error early
+
+ -- Primoz Bratanic <primoz@slo-tech.com>  Sun, 8 May 2005 23:10:16 +0200
+
+pam-pgsql (0.5.2-8) unstable; urgency=low
+
+  * Orphan. Set maintainer to QA.
+
+ -- Debian QA Group <packages@qa.debian.org>  Mon, 18 Apr 2005 09:22:16 +0200
+
+pam-pgsql (0.5.2-7) unstable; urgency=high
+
+  * Fix possible format string vulnerability in logging of username.
+    Thanks to Florian Zumbiehl for pointing this out. (closes: Bug#204438)
+  * urgency=high for this reason
+
+ -- Joerg Wendland <joergland@debian.org>  Thu,  7 Aug 2003 12:47:24 +0200
+
+pam-pgsql (0.5.2-6) unstable; urgency=low
+
+  * New Maintainer. (closes: Bug#188658)
+  * Standards-Version 3.5.9.
+  * Rebuild against libpq3. (closes: Bug#179766)
+  * DH_COMPAT=4
+  * Move to main.
+  * More to come soon...
+
+ -- Joerg Wendland <joergland@debian.org>  Tue, 13 May 2003 23:38:23 +0200
+
+pam-pgsql (0.5.2-5) unstable; urgency=critical
+
+  * Reupload with urgency=critical since we really want this in woody.
+
+ -- Tollef Fog Heen <tfheen@debian.org>  Sun, 28 Apr 2002 22:26:49 +0200
+
+pam-pgsql (0.5.2-4) unstable; urgency=low
+
+  * Marking the removal of the ("pgpkeys") from my Comment field in the gpg
+    key. Since the original secret key was lost in a crash I changed the key
+    and the Commet field.
+
+  * Added a sub-dir called public_key/ which contains both the OLD public key
+    and the NEW public key. The OLD key was signed with the NEW key in order
+    to establish within the package that a key changeover had taken place.
+    Since there was no way to revoke the key publicly, all documentation
+    regarding the lost key discussion can be found in the
+    debian-devel@lists.debian.org mail list archives. NOTE: This is _not_
+    meant to _supplant_ the established Debian rules regarding keys, but
+    merely to _augment_ that policy.
+
+  * Also imported entire structure from pristine source through current
+    version into CVS. I felt it was time to start using cvs-buildpackage to
+    handle package maintenence. HEAVY thanks go out to michaelw@debian.org for
+    helping me with getting the cvs up and running and teaching me the basics
+    correctly of cvs-buildpackage. (gotta love cvs-inject *.dsc)
+
+  * Fixed typo in README for pwtype. Thanks Tobias Olsson <tobias@toface.linux-site.net>
+    and Robert Pintarelli <robert.pintarelli@wh-hms.uni-ulm.de>. Closes: #138602, #142849
+
+  * Bad code for the queries was causing the system to lock out _every_ user
+    on the box if any single account was expired. Not Good(Tm). The fix for
+    this was submitted by Robert Pintarelli <robert.pintarelli@wh-hms.uni-ulm.de>
+    Closes: #143745
+
+ -- David D.W. Downey <david-downey@codecastle.com>  Fri, 26 Apr 2002 16:54:52 -0700
+
+pam-pgsql (0.5.2-3) unstable; urgency=low
+
+  * Just a rebuild against the current libpgsql. Hopefully this fixes any
+    problems with libpgsql2 version differences.
+
+ -- David D.W. Downey ("pgpkeys") <ddowney@codecastle.com>  Fri,  8 Mar 2002 18:13:57 -0800
+
+pam-pgsql (0.5.2-2) unstable; urgency=low
+
+  * Added escaped special char check and rewrite to handle bug #130114
+    Patch submitted by Joerg Wendland <joergland@debian.org>
+    Closes: #130114
+  * Added additional `\0` sanity check in while loop. Submitted by a friend
+    who wishes to remain anonymous due to legal contraints from his employer.
+
+ -- David D.W. Downey ("pgpkeys") <david-downey@codecastle.com>  Mon, 21 Jan 2002 01:41:36 -0800
+
+pam-pgsql (0.5.2-1) unstable; urgency=low
+
+  * New maintainer: David D.W. Downey ("pgpkeys") <david-downey@codecastle.com> Closes: #128400
+  * New upstream version (new upstream maintainer - me as well =)
+  * Not a debian native package any more
+  * New upstream source location is http://libpam-pgsql.codecastle.com
+
+ -- David D.W. Downey ("pgpkeys") <david-downey@codecastle.com>  Mon, 14 Jan 2002 09:37:28 -0800
+
+pam-pgsql (0.5.1) unstable; urgency=low
+
+  * Add libmhash-dev to Build-Depends. Closes: #94520
+
+ -- Leon Breedt <ljb@debian.org>  Thu, 19 Apr 2001 19:09:50 +0200
+
+pam-pgsql (0.5) unstable; urgency=low
+
+  * Always log error conditions to syslog.
+  * Fix typo in README, update CREDITS, and also taking this opportunity
+    to close wishlist bug fixed in 0.4 already. Closes: #76644
+
+ -- Leon Breedt <ljb@debian.org>  Wed, 18 Apr 2001 22:39:58 +0200
+
+pam-pgsql (0.4) unstable; urgency=low
+
+  * added MD5 and crypt() password support (introduces dependency on mhash)
+  * slightly more informative logging when 'debug' option is enabled
+
+ -- Leon Breedt <ljb@debian.org>  Tue, 17 Apr 2001 23:08:46 +0200
+
+pam-pgsql (0.3.1) unstable; urgency=low
+
+  * Non-maintainer upload, suggested by the maintainer, to recompile with
+    libpgsql2.1, because libpgsql2 was removed. As exception from the rule
+    the concerning bug is herewith closed because I am also its submitter;
+    closes: #86528 
+
+ -- Dr. Guenter Bechly <gbechly@debian.org>  Tue, 20 Feb 2001 22:03:20 +0100
+
+pam-pgsql (0.3) unstable; urgency=low
+
+  * Add Build-Depends for m68k build daemon
+
+ -- Leon Breedt <ljb@debian.org>  Wed,  2 Aug 2000 13:05:23 +0200
+
+pam-pgsql (0.2) unstable; urgency=low
+
+  * Initial autoconf support
+  * Include test.c in the examples
+  * Support for the FreeBSD platform
+
+ -- Leon Breedt <ljb@debian.org>  Tue, 04 Jul 2000 17:17:07 +0200
+
+pam-pgsql (0.1) unstable; urgency=low
+
+  * Initial release.
+
+ -- Leon Breedt <ljb@debian.org>  Sat, 24 Jun 2000 21:20:40 +0200
+
