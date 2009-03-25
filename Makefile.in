@@ -14,12 +14,11 @@ CFLAGS=		-O2 -frename-registers -fstrict-aliasing -fPIC -DPIC -Wall -W -Wdisable
 
 all: ${LIBLIB}
 
-DISTDIRS=	debian
+DISTDIRS=
 DISTFILES= acconfig.h README pam_get_pass.c pam_get_service.c pam_mod_misc.h \
-	pam_pgsql.c pam_std_option.c test.c debian/changelog debian/control \
-	debian/copyright debian/dirs debian/rules Makefile.in configure.in \
+	pam_pgsql.c pam_std_option.c test.c Makefile.in configure.in \
 	config.h.in install-sh config.sub config.guess install-module configure \
-	CREDITS
+	CREDITS COPYRIGHT CHANGELOG
     
 distfiles: ${DISTFILES}
 
