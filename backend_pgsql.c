@@ -321,6 +321,34 @@ encrypt_password(struct module_options *options, const char *pass, const char *s
 			}
 		}
 		break;
+		case PW_SHA1: {
+			char *buf;
+			int buf_size;
+			MHASH handle;
+			unsigned char *hash;
+			handle = mhash_init(MHASH_SHA1);
+			if(handle == MHASH_FAILED) {
+				SYSLOG("could not initialize mhash library!");
+			} else {
+				unsigned int i;
+				mhash(handle, pass, strlen(pass));
+				hash = mhash_end(handle);
+				if (hash != NULL) {
+					buf_size = (mhash_get_block_size(MHASH_SHA1) * 2)+1;
+					buf = (char *)malloc(buf_size);
+					bzero(buf, buf_size);
+
+					for(i = 0; i < mhash_get_block_size(MHASH_SHA1); i++) {
+						sprintf(&buf[i * 2], "%.2x", hash[i]);
+					}
+					free(hash);
+					s = buf;
+				} else {
+					s = strdup("!");
+				}
+			}
+		}
+		break;
 		case PW_CLEAR:
 		default:
 			s = strdup(pass);
