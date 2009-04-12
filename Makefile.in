@@ -1,8 +1,8 @@
 LIBSRC=     pam_pgsql.c
-LIBOBJ=     pam_pgsql.o pam_get_pass.o pam_std_option.o pam_get_service.o
+LIBOBJ=     pam_pgsql.o pam_get_pass.o pam_std_option.o pam_get_service.o backend_pgsql.o
 LIBLIB=     pam_pgsql.so
 
-DISTDIR=    pam-pgsql-0.5
+DISTDIR=    pam-pgsql-0.7
 ROOTDIR=	
 
 LINK=		@PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
@@ -17,6 +17,7 @@ all: ${LIBLIB}
 DISTDIRS=
 DISTFILES= acconfig.h README pam_get_pass.c pam_get_service.c pam_mod_misc.h \
 	pam_pgsql.c pam_std_option.c test.c Makefile.in configure.in \
+	backend_pgsql.c backend_pgsql.h \
 	config.h.in install-sh config.sub config.guess install-module configure \
 	CREDITS COPYRIGHT CHANGELOG
     

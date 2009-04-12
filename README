@@ -1,4 +1,4 @@
-pam_pgsql 0.6
+pam_pgsql 0.7
 =============
 
 Introduction
@@ -17,7 +17,7 @@ vanished, hence this module.
 Changes since last release
 ==========================
 
-See the file debian/changelog.
+See the file CHANGELOG.
 
 Compilation & Installation
 ==========================

@@ -1,4 +1,11 @@
+pam-pgsql (0.7) experimental; urgency=low
+
+  * Internal rework, spliting the PostgreSQL code from PAM
+
+ -- William Grzybowski <william@agencialivre.com.br>  Tue, 24 Mar 2009 09:47:50 -0300
+
 pam-pgsql (0.6.6) experimental; urgency=low
+
   * Removed references for debian/ package
 
  -- William Grzybowski <william@agencialivre.com.br>  Tue, 24 Mar 2009 09:47:50 -0300

@@ -1,5 +1,5 @@
 Name:		pam-pgsql
-Version:	0.6.5
+Version:	0.7
 Release:	1%{?dist}
 Summary:	This module provides support to authenticate against PostgreSQL tables for PAM-enabled appliations.
 Packager:	Jose Arthur Benetasso Villanova <jose.arthur@gmail.com>
