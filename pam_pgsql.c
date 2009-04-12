@@ -20,28 +20,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <libpq-fe.h>
 
-#define PAM_SM_AUTH
-#define PAM_SM_ACCOUNT
-#define PAM_SM_PASSWORD
-#include <security/pam_modules.h>
-#include "pam_mod_misc.h"
+#include "backend_pgsql.h"
+#include "pam_pgsql.h"
 
-#define PASSWORD_PROMPT         "Password: "
-#define PASSWORD_PROMPT_NEW	    "New password: "
-#define PASSWORD_PROMPT_CONFIRM "Confirm new password: "
-#define CONF                    "/etc/pam_pgsql.conf"
-
-#define DBGLOG(x...)  if(options->debug) {                          \
-                          openlog("PAM_pgsql", LOG_PID, LOG_AUTH);  \
-                          syslog(LOG_DEBUG, ##x);                   \
-                          closelog();                               \
-                      }
-#define SYSLOG(x...)  do {                                          \
-                          openlog("PAM_pgsql", LOG_PID, LOG_AUTH);  \
-                          syslog(LOG_INFO, ##x);                    \
-                          closelog();                               \
-                      } while(0);
 
 /* private: parse and set the specified string option */
 static void
@@ -250,78 +233,6 @@ free_module_options(struct module_options *options)
 		free(options->newtok_column);
 	bzero(options, sizeof(*options));
 	free(options);
-}
-
-static char *
-crypt_make_salt(struct module_options *options)
-{
-	static char result[12];
-	int len,pos;
-	struct timeval now;
-
-	if(options->pw_type==PW_CRYPT){
-		len=2;
-		pos=0;
-	} else { /* PW_CRYPT_MD5 */
-		strcpy(result,"$1$");
-		len=11;
-		pos=3;
-	}
-	gettimeofday(&now,NULL);
-	srandom(now.tv_sec*10000+now.tv_usec/100+clock());
-	while(pos<len)result[pos++]=i64c(random()&63);
-	result[len]=0;
-	return result;
-}
-
-/* private: encrypt password using the preferred encryption scheme */
-static char *
-encrypt_password(struct module_options *options, const char *pass, const char *salt)
-{
-	char *s = NULL;
-
-	switch(options->pw_type) {
-		case PW_CRYPT:
-		case PW_CRYPT_MD5:
-			if (salt==NULL) {
-				s = strdup(crypt(pass, crypt_make_salt(options)));
-			} else {
-				s = strdup(crypt(pass, salt));
-			}
-		break;
-		case PW_MD5: {
-			char *buf;
-			int buf_size;
-			MHASH handle;
-			unsigned char *hash;
-			handle = mhash_init(MHASH_MD5);
-			if(handle == MHASH_FAILED) {
-				SYSLOG("could not initialize mhash library!");
-			} else {
-				unsigned int i;
-				mhash(handle, pass, strlen(pass));
-				hash = mhash_end(handle);
-				if (hash != NULL) {
-					buf_size = (mhash_get_block_size(MHASH_MD5) * 2)+1;
-					buf = (char *)malloc(buf_size);
-					bzero(buf, buf_size);
-
-					for(i = 0; i < mhash_get_block_size(MHASH_MD5); i++) {
-						sprintf(&buf[i * 2], "%.2x", hash[i]);
-					}
-					free(hash);
-					s = buf;
-				} else {
-					s = strdup("!");
-				}
-			}
-		}
-		break;
-		case PW_CLEAR:
-		default:
-			s = strdup(pass);
-	}
-	return s;
 }
 
 /* public: authenticate user */
