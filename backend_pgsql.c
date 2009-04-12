@@ -88,35 +88,39 @@ build_conninfo(modopt_t *options)
 {
     char *str;
 
-	 str = (char *) malloc(sizeof(char)*512);
+	 if(options == NULL)
+		 return NULL;
 
-    memset(&str, 0, 512);
+	 str = (char *) malloc(sizeof(char)*512);
+    memset(str, 0, 512);
 
     /* SAFE */
     strncat(str, "dbname=", strlen("dbname="));
     strncat(str, options->db, strlen(options->db));
+	 printf("a\n");
 
-    if(options->host) {
-	strncat(str, " host=", strlen(" host="));
-	strncat(str, options->host, strlen(options->host));
-    }
-    if(options->port) {
-	strncat(str, " port=", strlen(" port="));
-	strncat(str, options->port, strlen(options->port));
-    }    
-    if(options->timeout) {
-	strncat(str, " connect_timeout=", strlen(" connect_timeout="));
-	strncat(str, options->timeout, strlen(options->timeout));
-    }
-    if(options->user) {
-	strncat(str, " user=", strlen(" user="));
-	strncat(str, options->user, strlen(options->user));
-    }
-    if(options->passwd) {
-	strncat(str, " password=", strlen(" password="));
-	strncat(str, options->passwd, strlen(options->passwd));
-    }
-    return str;
+	if(options->host) {
+		strncat(str, " host=", strlen(" host="));
+		strncat(str, options->host, strlen(options->host));
+	}
+	if(options->port) {
+		strncat(str, " port=", strlen(" port="));
+		strncat(str, options->port, strlen(options->port));
+	}    
+	if(options->timeout) {
+		strncat(str, " connect_timeout=", strlen(" connect_timeout="));
+		strncat(str, options->timeout, strlen(options->timeout));
+	}
+	if(options->user) {
+		strncat(str, " user=", strlen(" user="));
+		strncat(str, options->user, strlen(options->user));
+	}
+	if(options->passwd) {
+		strncat(str, " password=", strlen(" password="));
+		strncat(str, options->passwd, strlen(options->passwd));
+	}
+
+	return str;
 }
 
 /* private: open connection to PostgreSQL */
@@ -248,7 +252,7 @@ pg_execParam(PGconn *conn, PGresult **res,
 	const char *values[128];
 	char *command, *raddr;
 	struct hostent *hentry;
-	
+
 	if (!conn) 
 		return PAM_AUTHINFO_UNAVAIL;
 	bzero(values, sizeof(*values));
@@ -339,7 +343,6 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 	if(!(conn = db_connect(options)))
 		return PAM_AUTH_ERR;
 
-	SYSLOG("asas");
 	DBGLOG("query: %s", options->query_auth);
 	rc = PAM_AUTH_ERR;	
 	if(pg_execParam(conn, &res, options->query_auth, service, user, passwd, rhost) == PAM_SUCCESS) {

@@ -246,7 +246,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	int rc;
 	PGresult *res;
 	PGconn *conn;	
-	
+
 	user = NULL; password = NULL; rhost = NULL;
 
 	if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
@@ -255,7 +255,6 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 			if ((options = mod_options(argc, argv)) != NULL) {
 
-				SYSLOG("aqui %d\n", options->debug);
 				DBGLOG("attempting to authenticate: %s", user);
 				if ((rc = pam_get_pass(pamh, PAM_AUTHTOK, &password, PASSWORD_PROMPT, options->std_flags)) == PAM_SUCCESS) {
 

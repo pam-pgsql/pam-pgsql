@@ -114,15 +114,53 @@ modopt_t * mod_options(int argc, const char **argv) {
    char *ptr,*option,*value;
    modopt_t * modopt = (modopt_t *)malloc(sizeof(modopt_t));
 
+	struct opttab {
+		const char *name;
+		int value;
+	};
+	static struct opttab std_options[] = {
+		{ "debug",          PAM_OPT_DEBUG },
+		{ "no_warn",        PAM_OPT_NO_WARN },
+		{ "authtok", 	    PAM_OPT_USE_FIRST_PASS },
+		{ "use_authtok",    PAM_OPT_USE_FIRST_PASS },        
+		{ "use_first_pass", PAM_OPT_USE_FIRST_PASS },
+		{ "try_first_pass", PAM_OPT_TRY_FIRST_PASS },
+		{ "use_mapped_pass",PAM_OPT_USE_MAPPED_PASS },
+		{ "echo_pass",      PAM_OPT_ECHO_PASS },
+		{ NULL,         0 }
+	};
+	struct opttab *p;
+
+	/* Initializing values */
    modopt->db = NULL;
    modopt->host = NULL;
    modopt->user = NULL;
+   modopt->table = NULL;
    modopt->passwd = NULL;
+   modopt->timeout = NULL;
    modopt->fileconf = NULL;
+	modopt->column_pwd = NULL;
+	modopt->column_user = NULL;
+	modopt->column_expired = NULL;
+	modopt->column_newpwd = NULL;
+	modopt->query_acct = NULL;
+	modopt->query_pwd = NULL;
+	modopt->query_auth = NULL;
+	modopt->query_auth_succ = NULL;
+	modopt->query_auth_fail = NULL;
+	modopt->query_session_open = NULL;
+	modopt->query_session_close = NULL;
    modopt->port = strdup("5432");
    modopt->debug = 0;
 
    for(i=0;i<argc;i++) {
+
+		for (p = std_options; p->name != NULL; p++) {
+			if (strcmp(argv[i], p->name) == 0) {
+				modopt->std_flags |= p->value;
+				break;
+			}
+		}
 
       ptr = strchr(argv[i], '=');
       if(ptr != NULL) {
@@ -160,6 +198,17 @@ modopt_t * mod_options(int argc, const char **argv) {
       modopt->fileconf = strdup(PAM_PGSQL_FILECONF);
 
 	read_config_file(modopt);
+
+	if(modopt->query_auth == NULL) {
+
+		if(modopt->column_pwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
+
+			modopt->query_auth = malloc(32+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
+			sprintf(modopt->query_auth, "select %s from %s where %s = %%u", modopt->column_pwd, modopt->table, modopt->column_user);
+
+		}
+
+	}
 
    return modopt;
 

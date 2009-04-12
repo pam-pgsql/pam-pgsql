@@ -4,7 +4,8 @@
  * Based in part on pam_unix.c of FreeBSD. See COPYRIGHT
  * for licensing details.
  *
- * David D.W. Downey ("pgpkeys") <david-downey@codecastle.com> et al. (see debian/copyright)
+ * David D.W. Downey ("pgpkeys") <david-downey@codecastle.com> et al. (see COPYRIGHT)
+ * William Grzybowski <william@agencialivre.com.br>
  */
 
 
