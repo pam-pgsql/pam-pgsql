@@ -1,7 +1,7 @@
 /*
  * PAM authentication module for PostgreSQL
  * 
- * Based in part on pam_unix.c of FreeBSD. See debian/copyright
+ * Based in part on pam_unix.c of FreeBSD. See COPYRIGHT
  * for licensing details.
  *
  * David D.W. Downey ("pgpkeys") <david-downey@codecastle.com> et al. (see debian/copyright)
@@ -23,6 +23,8 @@
 #define PASSWORD_PROMPT_NEW	    "New password: "
 #define PASSWORD_PROMPT_CONFIRM "Confirm new password: "
 #define CONF                    "/etc/pam_pgsql.conf"
+
+#include <syslog.h>
 
 #define DBGLOG(x...)  if(options->debug) {                          \
                           openlog("PAM_pgsql", LOG_PID, LOG_AUTH);  \

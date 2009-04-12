@@ -83,12 +83,62 @@ options_valid(struct module_options *options)
 	return PAM_SUCCESS;
 }
 
+char *
+build_conninfo(modopt_t *options)
+{
+    char *str;
+
+	 str = (char *) malloc(sizeof(char)*512);
+
+    memset(&str, 0, 512);
+
+    /* SAFE */
+    strncat(str, "dbname=", strlen("dbname="));
+    strncat(str, options->db, strlen(options->db));
+
+    if(options->host) {
+	strncat(str, " host=", strlen(" host="));
+	strncat(str, options->host, strlen(options->host));
+    }
+    if(options->port) {
+	strncat(str, " port=", strlen(" port="));
+	strncat(str, options->port, strlen(options->port));
+    }    
+    if(options->timeout) {
+	strncat(str, " connect_timeout=", strlen(" connect_timeout="));
+	strncat(str, options->timeout, strlen(options->timeout));
+    }
+    if(options->user) {
+	strncat(str, " user=", strlen(" user="));
+	strncat(str, options->user, strlen(options->user));
+    }
+    if(options->passwd) {
+	strncat(str, " password=", strlen(" password="));
+	strncat(str, options->passwd, strlen(options->passwd));
+    }
+    return str;
+}
+
 /* private: open connection to PostgreSQL */
 PGconn *
 pg_connect(struct module_options *options)
 {
 	PGconn *conn;
 	conn = PQconnectdb(options->pg_conn_str);
+	if(PQstatus(conn) != CONNECTION_OK) {
+		SYSLOG("PostgreSQL connection failed: '%s'", PQerrorMessage(conn));
+		return NULL;
+	}
+	return conn;
+}
+
+PGconn *
+db_connect(modopt_t *options)
+{
+	PGconn *conn;
+	char *conninfo;
+	conninfo = build_conninfo(options);
+	conn = PQconnectdb(conninfo);
 	if(PQstatus(conn) != CONNECTION_OK) {
 		SYSLOG("PostgreSQL connection failed: '%s'", PQerrorMessage(conn));
 		return NULL;
@@ -248,7 +298,7 @@ i64c(int i)
 	return ('z');
 }
 
-/* private: authenticate user and passwd against database */
+/* authenticate user and passwd against database */
 int
 auth_verify_password(const char *service, const char *user, const char *passwd, const char *rhost,
                      struct module_options *options)
@@ -277,6 +327,34 @@ auth_verify_password(const char *service, const char *user, const char *passwd, 
 	return rc;
 }
 
+
+int
+backend_authenticate(const char *service, const char *user, const char *passwd, const char *rhost, modopt_t *options)
+{
+	PGresult *res;
+	PGconn *conn;
+	int rc;
+	char *tmp;
+
+	if(!(conn = db_connect(options)))
+		return PAM_AUTH_ERR;
+
+	SYSLOG("asas");
+	DBGLOG("query: %s", options->query_auth);
+	rc = PAM_AUTH_ERR;	
+	if(pg_execParam(conn, &res, options->query_auth, service, user, passwd, rhost) == PAM_SUCCESS) {
+		if(PQntuples(res) == 0) {
+			rc = PAM_USER_UNKNOWN;
+		} else {
+			char *stored_pw = PQgetvalue(res, 0, 0);
+			if (!strcmp(stored_pw, (tmp = password_encrypt(options, passwd, stored_pw)))) rc = PAM_SUCCESS; 
+			free (tmp);
+		}
+		PQclear(res);
+	}
+	PQfinish(conn);
+	return rc;
+}
 
 /* private: encrypt password using the preferred encryption scheme */
 char *
@@ -354,6 +432,105 @@ encrypt_password(struct module_options *options, const char *pass, const char *s
 			s = strdup(pass);
 	}
 	return s;
+}
+
+char *
+password_encrypt(modopt_t *options, const char *pass, const char *salt)
+{
+	char *s = NULL;
+
+	switch(options->pw_type) {
+		case PW_CRYPT:
+		case PW_CRYPT_MD5:
+			if (salt==NULL) {
+				s = strdup(crypt(pass, crypt_makesalt(options->pw_type)));
+			} else {
+				s = strdup(crypt(pass, salt));
+			}
+		break;
+		case PW_MD5: {
+			char *buf;
+			int buf_size;
+			MHASH handle;
+			unsigned char *hash;
+			handle = mhash_init(MHASH_MD5);
+			if(handle == MHASH_FAILED) {
+				SYSLOG("could not initialize mhash library!");
+			} else {
+				unsigned int i;
+				mhash(handle, pass, strlen(pass));
+				hash = mhash_end(handle);
+				if (hash != NULL) {
+					buf_size = (mhash_get_block_size(MHASH_MD5) * 2)+1;
+					buf = (char *)malloc(buf_size);
+					bzero(buf, buf_size);
+
+					for(i = 0; i < mhash_get_block_size(MHASH_MD5); i++) {
+						sprintf(&buf[i * 2], "%.2x", hash[i]);
+					}
+					free(hash);
+					s = buf;
+				} else {
+					s = strdup("!");
+				}
+			}
+		}
+		break;
+		case PW_SHA1: {
+			char *buf;
+			int buf_size;
+			MHASH handle;
+			unsigned char *hash;
+			handle = mhash_init(MHASH_SHA1);
+			if(handle == MHASH_FAILED) {
+				SYSLOG("could not initialize mhash library!");
+			} else {
+				unsigned int i;
+				mhash(handle, pass, strlen(pass));
+				hash = mhash_end(handle);
+				if (hash != NULL) {
+					buf_size = (mhash_get_block_size(MHASH_SHA1) * 2)+1;
+					buf = (char *)malloc(buf_size);
+					bzero(buf, buf_size);
+
+					for(i = 0; i < mhash_get_block_size(MHASH_SHA1); i++) {
+						sprintf(&buf[i * 2], "%.2x", hash[i]);
+					}
+					free(hash);
+					s = buf;
+				} else {
+					s = strdup("!");
+				}
+			}
+		}
+		break;
+		case PW_CLEAR:
+		default:
+			s = strdup(pass);
+	}
+	return s;
+}
+
+char *
+crypt_makesalt(pw_scheme scheme)
+{
+	static char result[12];
+	int len,pos;
+	struct timeval now;
+
+	if(scheme==PW_CRYPT){
+		len=2;
+		pos=0;
+	} else { /* PW_CRYPT_MD5 */
+		strcpy(result,"$1$");
+		len=11;
+		pos=3;
+	}
+	gettimeofday(&now,NULL);
+	srandom(now.tv_sec*10000+now.tv_usec/100+clock());
+	while(pos<len)result[pos++]=i64c(random()&63);
+	result[len]=0;
+	return result;
 }
 
 char *

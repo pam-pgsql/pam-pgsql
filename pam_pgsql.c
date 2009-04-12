@@ -1,10 +1,11 @@
 /*
  * PAM authentication module for PostgreSQL
  * 
- * Based in part on pam_unix.c of FreeBSD. See debian/copyright
+ * Based in part on pam_unix.c of FreeBSD. See COPYRIGHT
  * for licensing details.
  *
- * David D.W. Downey ("pgpkeys") <david-downey@codecastle.com> et al. (see debian/copyright)
+ * David D.W. Downey ("pgpkeys") <david-downey@codecastle.com> et al. (see COPYRIGHT)
+ * William Grzybowski <william@agencialivre.com.br>
  */
 
 #include <stdio.h>
@@ -24,6 +25,7 @@
 
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"
+#include "pam_pgsql_options.h"
 
 
 /* private: parse and set the specified string option */
@@ -239,7 +241,7 @@ free_module_options(struct module_options *options)
 PAM_EXTERN int
 pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
-	struct module_options *options = NULL;
+	modopt_t *options = NULL;
 	const char *user, *password, *rhost;
 	int rc;
 	PGresult *res;
@@ -248,41 +250,56 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	user = NULL; password = NULL; rhost = NULL;
 
 	if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
+
 		if ((rc = pam_get_user(pamh, &user, NULL)) == PAM_SUCCESS) {
-			if ((rc = get_module_options(argc, argv, &options)) == PAM_SUCCESS) {
+
+			if ((options = mod_options(argc, argv)) != NULL) {
+
+				SYSLOG("aqui %d\n", options->debug);
 				DBGLOG("attempting to authenticate: %s", user);
 				if ((rc = pam_get_pass(pamh, PAM_AUTHTOK, &password, PASSWORD_PROMPT, options->std_flags)) == PAM_SUCCESS) {
-					if ((rc = auth_verify_password(pam_get_service(pamh), user, password, rhost, options)) == PAM_SUCCESS) {
+
+					if ((rc = backend_authenticate(pam_get_service(pamh), user, password, rhost, options)) == PAM_SUCCESS) {
 						if ((password == 0 || *password == 0) && (flags & PAM_DISALLOW_NULL_AUTHTOK)) {
 							rc = PAM_AUTH_ERR; 
 						} else {
 							SYSLOG("(%s) user %s authenticated.", pam_get_service(pamh), user);
 						}
+
+					} else {
+
+						SYSLOG("couldn't auth");
+
 					}
+
+				} else {
+
+					SYSLOG("couldn't get pass");
+
 				}
 			}
 		}
 	}
 	
 	if (rc == PAM_SUCCESS) {
-		if (options->auth_succ_query) {
-			if ((conn = pg_connect(options))) {
-				pg_execParam(conn, &res, options->auth_succ_query, pam_get_service(pamh), user, password, rhost);
+		if (options->query_auth_succ) {
+			if ((conn = db_connect(options))) {
+				pg_execParam(conn, &res, options->query_auth_succ, pam_get_service(pamh), user, password, rhost);
 				PQclear(res);
 				PQfinish(conn);
 			}
 		}
 	} else {
-		if (options->auth_fail_query) {
-			if ((conn = pg_connect(options))) {
-				pg_execParam(conn, &res, options->auth_fail_query, pam_get_service(pamh), user, password, rhost);
+		if (options->query_auth_fail) {
+			if ((conn = db_connect(options))) {
+				pg_execParam(conn, &res, options->query_auth_fail, pam_get_service(pamh), user, password, rhost);
 				PQclear(res);
 				PQfinish(conn);
 			}
 		}
 	}
 
-	free_module_options(options);
+	free_mod_options(options);
 	return rc;
 }
 
