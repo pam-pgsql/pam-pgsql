@@ -232,7 +232,7 @@ pg_execParam(PGconn *conn, PGresult **res,
 }
 
 /* private: convert an integer to a radix 64 character */
-int
+static int
 i64c(int i)
 {
 	if (i <= 0)
