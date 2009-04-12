@@ -5,12 +5,12 @@
 
 begin;
 
-	CREATE TABLE `account` (
+	CREATE TABLE account (
 
 		username varchar(255) UNIQUE NOT NULL,
 		password varchar(200),
 		expired timestamptz,
-		newtok varchar(200),
+		newtok varchar(200)
 
 	);
 
