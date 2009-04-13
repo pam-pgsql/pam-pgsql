@@ -155,6 +155,7 @@ modopt_t * mod_options(int argc, const char **argv) {
    modopt->user = NULL;
    modopt->table = NULL;
    modopt->passwd = NULL;
+   modopt->pw_type = PW_SHA1;
    modopt->sslmode = strdup("prefer");
    modopt->timeout = NULL;
    modopt->fileconf = NULL;
@@ -248,9 +249,7 @@ modopt_t * mod_options(int argc, const char **argv) {
 		if(modopt->column_pwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
 
 			modopt->query_auth = (char *) malloc(32+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
-			printf("fazendo..\n");
 			sprintf(modopt->query_auth, "select %s from %s where %s = %%u", modopt->column_pwd, modopt->table, modopt->column_user);
-			printf("aqui: %s\n", modopt->query_auth);
 
 		}
 
