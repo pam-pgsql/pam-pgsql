@@ -1,16 +1,55 @@
 dnl Configure template for pam_pgsql
 
+AC_PREREQ([2.63])
 AC_INIT([pam-pgsql], 0.7,[http://sourceforge.net/tracker/?func=add&group_id=62198&atid=499727], pam-pgsql)
-AC_CONFIG_HEADER(config.h)
+
+AC_CONFIG_SRCDIR([pam_pgsql.c])
+AC_CONFIG_HEADERS([config.h])
+
+AM_INIT_AUTOMAKE(pam_sm_authenticate)
+
+#AM_INIT_AUTOMAKE([dist-bzip2])
+
+#check programs
+AC_PROG_CC
+AC_PROG_MAKE_SET
 
 dnl Checks for libraries.
 AC_CHECK_LIB(pam, pam_get_user)
 
 dnl Checks for header files.
-AC_CANONICAL_HOST
-AC_HEADER_STDC
-AC_CHECK_HEADERS(syslog.h)
-AC_CHECK_HEADERS(netdb.h)
+AC_PATH_X
+AC_FUNC_ALLOCA
+AC_HEADER_RESOLV
+AC_CHECK_HEADERS([syslog.h netdb.h malloc.h memory.h stddef.h stdint.h stdlib.h string.h unistd.h])
+
+# Checks for typedefs, structures, and compiler characteristics.
+AC_TYPE_UID_T
+AC_C_INLINE
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_INT8_T
+AC_TYPE_MODE_T
+AC_TYPE_OFF_T
+AC_TYPE_PID_T
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
+AC_TYPE_UINT8_T
+AC_CHECK_TYPES([ptrdiff_t])
+
+# Checks for library functions.
+AM_GNU_GETTEXT
+AC_FUNC_ERROR_AT_LINE
+AC_FUNC_FORK
+AC_FUNC_FSEEKO
+AC_FUNC_MALLOC
+AC_FUNC_REALLOC
+AC_CHECK_FUNCS([atexit bzero gethostbyname inet_ntoa memmove memset mkdir pow regcomp socket sqrt strcasecmp strchr strdup strerror strndup strrchr strstr strtol strtoul])
+
+AC_CONFIG_FILES([Makefile])
+AC_CONFIG_SUBDIR
 
 AC_MSG_CHECKING(for PostgreSQL headers)
 for d in /usr /usr/local /usr/local/pgsql; do
@@ -86,8 +125,4 @@ AC_ARG_WITH(debug,
     DEBUG="-g"],
 [DEBUG=""; DEBUG_LIB=""])
 
-dnl Checks for typedefs, structures, and compiler characteristics.
-AC_C_CONST
-
-AC_SUBST(host_os)
-AC_OUTPUT(Makefile)
+AC_OUTPUT

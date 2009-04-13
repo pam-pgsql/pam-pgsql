@@ -1,3 +1,7 @@
+AUTOMAKE_OPTIONS = foreign
+
+CFLAGS=	-O2 -frename-registers -fstrict-aliasing -fPIC -DPIC -Wall -W -Wdisabled-optimization -Wredundant-decls -Wmissing-format-attribute -Wmissing-noreturn -D_GNU_SOURCE ${INCLUDE} ${DEBUG}
+
 LIBSRC=     pam_pgsql.c
 LIBOBJ=     pam_pgsql.o pam_get_pass.o pam_std_option.o pam_get_service.o backend_pgsql.o pam_pgsql_options.o
 LIBLIB=     pam_pgsql.so
@@ -9,7 +13,6 @@ LINK=		@PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
 LDLIBS=		${LINK} -lpam -lpq @PAM_MISC_LD@ @MHASH_LD@
 INCLUDE=	@PGSQL_INC@ @MHASH_INC@
 DEBUG=      @DEBUG@
-CFLAGS=		-O2 -g -frename-registers -fstrict-aliasing -fPIC -DPIC -Wall -W -Wdisabled-optimization -Wredundant-decls -Wmissing-format-attribute -Wmissing-noreturn -D_GNU_SOURCE ${INCLUDE} ${DEBUG}
 
 
 all: ${LIBLIB}

@@ -1,12 +1,9 @@
-#! /bin/sh
+#!/bin/sh
 
-srcdir=`dirname $0`
-test -z "$srcdir" && srcdir=.
+echo "Generating configure files... may take a while."
 
-ORIGDIR=`pwd`
-cd $srcdir
-
-autoreconf -v --install || exit 1
-cd $ORIGDIR || exit $?
-
-$srcdir/configure "$@"
+autoreconf --install --force && \
+  echo "Preparing was successful if there was no error messages above." && \
+  echo "Now type:" && \
+  echo "  ./configure && make"  && \
+  echo "Run './configure --help' for more information"
