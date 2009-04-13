@@ -17,6 +17,7 @@ typedef struct modopt_s {
 	char *timeout;
    char *user;
    char *passwd;
+   char *sslmode;
 	char *column_pwd;
 	char *column_user;
 	char *column_expired;

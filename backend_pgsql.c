@@ -119,6 +119,10 @@ build_conninfo(modopt_t *options)
 		strncat(str, " password=", strlen(" password="));
 		strncat(str, options->passwd, strlen(options->passwd));
 	}
+	if(options->sslmode) {
+		strncat(str, " sslmode=", strlen(" sslmode="));
+		strncat(str, options->sslmode, strlen(options->sslmode));
+	}
 
 	return str;
 }

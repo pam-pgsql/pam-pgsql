@@ -1,6 +1,10 @@
 pam-pgsql (0.7) experimental; urgency=low
 
-  * Internal rework, spliting the PostgreSQL code from PAM
+  * Internal code rework
+    - spliting the PostgreSQL code from PAM
+    - spliting the module options code from the PAM
+  * Critical module options are no longer avaible from pam.d/pam.conf for security issues
+  * sslmode module option was added and is recommended to use as "require" when the postgresql database is not localhost to prevent critical data traffic without encryption, default: prefer
 
  -- William Grzybowski <william@agencialivre.com.br>  Tue, 24 Mar 2009 09:47:50 -0300
 

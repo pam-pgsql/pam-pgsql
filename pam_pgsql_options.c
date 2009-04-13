@@ -72,6 +72,15 @@ read_config_file(modopt_t *options)
 				options->timeout = strdup(val);
 			} else if(!strcmp(buffer, "user")) {
 				options->user = strdup(val);
+			} else if(!strcmp(buffer, "sslmode")) {
+
+				/* If not a valid option */
+				if(strcmp(val, "require") != 0 && strcmp(val, "prefer") != 0 && strcmp(val, "allow") != 0 && strcmp(val,"disable") != 0) {
+					SYSLOG("sslmode \"%s\" is not a valid option! Falling back to \"prefer\".", val);
+					options->sslmode = strdup("prefer");
+				} else
+            	options->sslmode = strdup(val);
+
 			} else if(!strcmp(buffer, "password")) {
 				options->passwd = strdup(val);
 			} else if(!strcmp(buffer, "user_column")) {
@@ -110,7 +119,7 @@ read_config_file(modopt_t *options)
 
 modopt_t * mod_options(int argc, const char **argv) {
 
-   int i;
+   int i,force=0;
    char *ptr,*option,*value;
    modopt_t * modopt = (modopt_t *)malloc(sizeof(modopt_t));
 
@@ -137,6 +146,7 @@ modopt_t * mod_options(int argc, const char **argv) {
    modopt->user = NULL;
    modopt->table = NULL;
    modopt->passwd = NULL;
+   modopt->sslmode = strdup("prefer");
    modopt->timeout = NULL;
    modopt->fileconf = NULL;
 	modopt->column_pwd = NULL;
@@ -176,10 +186,21 @@ modopt_t * mod_options(int argc, const char **argv) {
             modopt->db = strdup(value);
          } else if( strcmp(option, "user") == 0 ) {
             modopt->user = strdup(value);
-         } else if( strcmp(option, "passwd") == 0 ) {
+         } else if( strcmp(option, "password") == 0 ) {
             modopt->passwd = strdup(value);
+         } else if( strcmp(option, "sslmode") == 0 ) {
+
+				/* If not a valid option */
+				if(strcmp(value, "require") != 0 && strcmp(value, "prefer") != 0 && strcmp(value, "allow") != 0 && strcmp(value,"disable") != 0) {
+					SYSLOG("sslmode \"%s\" is not a valid option! Falling back to \"prefer\".", value);
+					modopt->sslmode = strdup("prefer");
+				} else
+            	modopt->sslmode = strdup(value);
+
          } else if( strcmp(option, "debug") == 0 ) {
             modopt->debug = atoi(value);
+         } else if( strcmp(option, "force") == 0 ) {
+            force = 1;
          } else if( strcmp(option, "port") == 0 ) {
             modopt->port = strdup(value);
          }
