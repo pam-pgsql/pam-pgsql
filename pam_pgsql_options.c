@@ -43,6 +43,15 @@ read_config_file(modopt_t *options)
 
 				while(*val && isspace(*val)) val++;
 
+				eq = val;
+				while(*eq != '\0') eq++;
+				eq--;
+
+				while(*eq == '\n') {
+					*eq = '\0';
+					eq--;
+				}
+
 			} else val = NULL;
 
 
@@ -120,7 +129,7 @@ read_config_file(modopt_t *options)
 modopt_t * mod_options(int argc, const char **argv) {
 
    int i,force=0;
-   char *ptr,*option,*value;
+   char *ptr,*value;
    modopt_t * modopt = (modopt_t *)malloc(sizeof(modopt_t));
 
 	struct opttab {
@@ -175,6 +184,7 @@ modopt_t * mod_options(int argc, const char **argv) {
       ptr = strchr(argv[i], '=');
       if(ptr != NULL) {
 
+			char *option;
          option = strndup(argv[i], ptr-argv[i]);
          value = strndup(ptr+1, strchr(argv[i],'\0')-ptr);
 
@@ -182,8 +192,10 @@ modopt_t * mod_options(int argc, const char **argv) {
             modopt->host = strdup(value);
          } else if( strcmp(option, "fileconf") == 0 ) {
             modopt->fileconf = strdup(value);
-         } else if( strcmp(option, "db") == 0 ) {
+         } else if( strcmp(option, "database") == 0 ) {
             modopt->db = strdup(value);
+         } else if( strcmp(option, "table") == 0 ) {
+            modopt->table = strdup(value);
          } else if( strcmp(option, "user") == 0 ) {
             modopt->user = strdup(value);
          } else if( strcmp(option, "password") == 0 ) {
@@ -199,8 +211,6 @@ modopt_t * mod_options(int argc, const char **argv) {
 
          } else if( strcmp(option, "debug") == 0 ) {
             modopt->debug = atoi(value);
-         } else if( strcmp(option, "force") == 0 ) {
-            force = 1;
          } else if( strcmp(option, "port") == 0 ) {
             modopt->port = strdup(value);
          }
@@ -209,11 +219,20 @@ modopt_t * mod_options(int argc, const char **argv) {
 
          if( strcmp(argv[i], "fileconf") == 0 ) {
             modopt->fileconf = strdup(PAM_PGSQL_FILECONF);
+         } else if( strcmp(argv[i], "force") == 0 ) {
+            force = 1;
          }
 
       }
 
    }
+
+	/* Setting password in the module options is unsafe */
+	if(force == 0 && modopt->passwd != NULL) {
+		SYSLOG("You cannot set the password in the module options, it's unsafe! If you know what you're doing use \"force\" in the options.");
+		free(modopt->passwd);
+		modopt->passwd = NULL;
+	}
 
    if(modopt->fileconf == NULL)
       modopt->fileconf = strdup(PAM_PGSQL_FILECONF);
@@ -229,7 +248,9 @@ modopt_t * mod_options(int argc, const char **argv) {
 		if(modopt->column_pwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
 
 			modopt->query_auth = (char *) malloc(32+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
+			printf("fazendo..\n");
 			sprintf(modopt->query_auth, "select %s from %s where %s = %%u", modopt->column_pwd, modopt->table, modopt->column_user);
+			printf("aqui: %s\n", modopt->query_auth);
 
 		}
 

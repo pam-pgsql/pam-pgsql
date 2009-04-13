@@ -255,7 +255,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 			if ((options = mod_options(argc, argv)) != NULL) {
 
-				DBGLOG("attempting to authenticate: %s", user);
+				DBGLOG("attempting to authenticate: %s, %s", user, options->query_auth);
 				if ((rc = pam_get_pass(pamh, PAM_AUTHTOK, &password, PASSWORD_PROMPT, options->std_flags)) == PAM_SUCCESS) {
 
 					if ((rc = backend_authenticate(pam_get_service(pamh), user, password, rhost, options)) == PAM_SUCCESS) {
