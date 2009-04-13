@@ -1,6 +1,6 @@
 dnl Configure template for pam_pgsql
 
-AC_INIT(pam_get_pass.c)
+AC_INIT([pam-pgsql], 0.7,[http://sourceforge.net/tracker/?func=add&group_id=62198&atid=499727], pam-pgsql)
 AC_CONFIG_HEADER(config.h)
 
 dnl Checks for libraries.
@@ -81,7 +81,7 @@ AC_SUBST(DEBUG)
 AC_SUBST(DEBUG_LIB)
 AC_ARG_WITH(debug, 
 [  --with-debug            Enable debugging routines], 
-[AC_DEFINE(DEBUG) 
+[AC_DEFINE([DEBUG], [], [Debug]) 
     AC_CHECK_LIB(efence, malloc, [DEBUG_LIB="-lefence"])
     DEBUG="-g"],
 [DEBUG=""; DEBUG_LIB=""])
