@@ -455,7 +455,7 @@ PAM_EXTERN int
 pam_sm_open_session(pam_handle_t *pamh, int flags,
             int argc, const char **argv)
 {
-	struct module_options *options = NULL;
+	modopt_t *options = NULL;
 	const char *user, *rhost;
 	int rc;
 	PGresult *res;
@@ -463,30 +463,34 @@ pam_sm_open_session(pam_handle_t *pamh, int flags,
 	
 	user = NULL; rhost = NULL;
 
-	if ((rc = get_module_options(argc, argv, &options)) == PAM_SUCCESS) {
-	  if (options->session_open_query) {
-	    if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
-		if ((rc = pam_get_user(pamh, &user, NULL)) == PAM_SUCCESS) {
-			DBGLOG("Session opened for user: %s", user);
-			if ((conn = pg_connect(options))) {
-                          pg_execParam(conn, &res, options->session_open_query, pam_get_service(pamh), user, NULL, rhost);
-                          PQclear(res);
-                          PQfinish(conn);
+	if ((options = mod_options(argc, argv)) != NULL) {
+
+		if (options->query_session_open) {
+
+			if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
+
+				if ((rc = pam_get_user(pamh, &user, NULL)) == PAM_SUCCESS) {
+					DBGLOG("Session opened for user: %s", user);
+					if ((conn = db_connect(options))) {
+						pg_execParam(conn, &res, options->query_session_open, pam_get_service(pamh), user, NULL, rhost);
+						PQclear(res);
+						PQfinish(conn);
+					}
+				}
 			}
 		}
-        }
-    }
-	free_module_options(options);
-    }
+	///free_module_options(options);
+	}
 
-    return (PAM_SUCCESS);
+	return (PAM_SUCCESS);
+
 }
 
 PAM_EXTERN int
 pam_sm_close_session(pam_handle_t *pamh, int flags,
             int argc, const char *argv[])
 {
-	struct module_options *options = NULL;
+	modopt_t *options = NULL;
 	const char *user, *rhost;
 	int rc;
 	PGresult *res;
@@ -494,22 +498,25 @@ pam_sm_close_session(pam_handle_t *pamh, int flags,
 	
 	user = NULL; rhost = NULL;
 
-	if ((rc = get_module_options(argc, argv, &options)) == PAM_SUCCESS) {
-	if (options->session_close_query) {
-	    if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
-		if ((rc = pam_get_user(pamh, &user, NULL)) == PAM_SUCCESS) {
-			DBGLOG("Session opened for user: %s", user);
-			if ((conn = pg_connect(options))) {
-                          pg_execParam(conn, &res, options->session_close_query, pam_get_service(pamh), user, NULL, rhost);
+	if ((options = mod_options(argc, argv)) != NULL) {
+
+		if (options->query_session_close) {
+
+			if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
+
+				if ((rc = pam_get_user(pamh, &user, NULL)) == PAM_SUCCESS) {
+					DBGLOG("Session opened for user: %s", user);
+					if ((conn = db_connect(options))) {
+                          pg_execParam(conn, &res, options->query_session_close, pam_get_service(pamh), user, NULL, rhost);
                           PQclear(res);
                           PQfinish(conn);
+					}
+				}
 			}
 		}
-        }
-    }
-	free_module_options(options);
-    }
+	//free_module_options(options);
+	}
 
-    return (PAM_SUCCESS);
+	return (PAM_SUCCESS);
+
 }
-
