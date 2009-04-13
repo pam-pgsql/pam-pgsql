@@ -298,7 +298,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 		}
 	}
 
-	free_mod_options(options);
+	//free_mod_options(options);
 	return rc;
 }
 
@@ -307,7 +307,7 @@ PAM_EXTERN int
 pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
                             const char **argv)
 {
-	struct module_options *options = NULL;
+	modopt_t *options = NULL;
 	const char *user, *rhost;
 	int rc;
 	PGconn *conn;
@@ -315,21 +315,22 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 	
 	user = NULL; rhost = NULL;
     
-	if ((rc = get_module_options(argc, argv, &options)) == PAM_SUCCESS) {
+	if ((options = mod_options(argc, argv)) != NULL) {
+
 		/* query not specified, just succeed. */
-		if (options->acct_query == 0) {
-			free_module_options(options);
+		if (options->query_acct == NULL) {
+			//free_module_options(options);
 			return PAM_SUCCESS;
 		}
 		
 		if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
 			if((rc = pam_get_user(pamh, &user, NULL)) == PAM_SUCCESS) {
-				if(!(conn = pg_connect(options))) {
+				if(!(conn = db_connect(options))) {
 					rc = PAM_AUTH_ERR;
 				} else {
-					DBGLOG("query: %s", options->acct_query);
+					DBGLOG("query: %s", options->query_acct);
 					rc = PAM_AUTH_ERR;
-					if(pg_execParam(conn, &res, options->acct_query, pam_get_service(pamh), user, NULL, rhost) == PAM_SUCCESS) {
+					if(pg_execParam(conn, &res, options->query_acct, pam_get_service(pamh), user, NULL, rhost) == PAM_SUCCESS) {
 						if (PQntuples(res) > 0 && PQnfields(res)>=2) {
 							char *expired_db = PQgetvalue(res, 0, 0);
 							char *newtok_db = PQgetvalue(res, 0, 1);
@@ -356,7 +357,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 		}
 	}
 	
-	free_module_options(options);
+	//free_module_options(options);
 	return rc;
 }
 
@@ -364,7 +365,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 PAM_EXTERN int
 pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
-	struct module_options *options = NULL;
+	modopt_t *options = NULL;
 	int rc;
 	const char *user, *pass, *newpass, *rhost;
 	const void *oldtok;
@@ -374,15 +375,16 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	
 	user = NULL; pass = NULL; newpass = NULL; rhost = NULL; newpass_crypt = NULL;
 
-	if ((rc =get_module_options(argc, argv, &options)) == PAM_SUCCESS) 
+	if ((options = mod_options(argc, argv)) != NULL) {
 		if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) 
 			rc = pam_get_user(pamh, &user, NULL);
-		
-
+	} else
+		rc = 1;
+	
 	if ((rc == PAM_SUCCESS) && (flags & PAM_PRELIM_CHECK)) {
 		if (getuid() != 0) {
 			if ((rc = pam_get_pass(pamh, PAM_OLDAUTHTOK, &pass, PASSWORD_PROMPT, options->std_flags)) == PAM_SUCCESS) {
-				rc = auth_verify_password(pam_get_service(pamh), user, pass, rhost, options);
+				rc = backend_authenticate(pam_get_service(pamh), user, pass, rhost, options);
 			} else {
 				SYSLOG("could not retrieve password from '%s'", user);
 			}
@@ -390,31 +392,34 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 			rc = PAM_SUCCESS;
 		}
 	} else if ((rc == PAM_SUCCESS) && (flags & PAM_UPDATE_AUTHTOK)) {
+
 		/* only try to check old password if user is not root */
 		pass = newpass = NULL;
 		if (getuid() != 0) {
+
 			if ((rc = pam_get_item(pamh, PAM_OLDAUTHTOK, &oldtok)) == PAM_SUCCESS) {
 				pass = (const char*) oldtok;
-				if ((rc = auth_verify_password(pam_get_service(pamh), user, pass, rhost, options)) != PAM_SUCCESS) {
+				if ((rc = backend_authenticate(pam_get_service(pamh), user, pass, rhost, options)) != PAM_SUCCESS) {
 					SYSLOG("(%s) user '%s' not authenticated.", pam_get_service(pamh), user);
 				}			
 			} else {
 				SYSLOG("could not retrieve old token");
 			}
 
-                 } else {
-                 	rc = PAM_SUCCESS;	
-                 }			
+		} else {
+			rc = PAM_SUCCESS;	
+		}			
 				
 		if (rc == PAM_SUCCESS) {
+
 			if ((rc = pam_get_confirm_pass(pamh, &newpass, PASSWORD_PROMPT_NEW, PASSWORD_PROMPT_CONFIRM, options->std_flags)) == PAM_SUCCESS) {
-				if((newpass_crypt = encrypt_password(options, newpass, NULL))) {
-					if(!(conn = pg_connect(options))) {
+				if((newpass_crypt = password_encrypt(options, newpass, NULL))) {
+					if(!(conn = db_connect(options))) {
 						rc = PAM_AUTHINFO_UNAVAIL;
 					}
 					if (rc == PAM_SUCCESS) {
-						DBGLOG("query: %s", options->pwd_query);
-						if(pg_execParam(conn, &res, options->pwd_query, pam_get_service(pamh), user, newpass_crypt, rhost) != PAM_SUCCESS) {
+						DBGLOG("query: %s", options->query_pwd);
+						if(pg_execParam(conn, &res, options->query_pwd, pam_get_service(pamh), user, newpass_crypt, rhost) != PAM_SUCCESS) {
 							rc = PAM_AUTH_ERR;
 						} else {
 							SYSLOG("(%s) password for '%s' was changed.", pam_get_service(pamh), user);
@@ -431,11 +436,12 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 			}
 		}
 	}
-	free_module_options(options);
+	//free_module_options(options);
 	if (flags & (PAM_PRELIM_CHECK | PAM_UPDATE_AUTHTOK))
 		return rc;
 	else
 		return PAM_AUTH_ERR;
+
 }
 
 /* public: just succeed. */

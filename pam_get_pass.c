@@ -98,8 +98,7 @@ pam_get_pass(pam_handle_t *pamh, int pam_item, const char **passp, const char *p
 }  
 
 int
-pam_get_confirm_pass(pam_handle_t *pamh, const char **passp, const char *prompt1,
-    const char *prompt2, int options)
+pam_get_confirm_pass(pam_handle_t *pamh, const char **passp, const char *prompt1, const char *prompt2, int options)
 {
     int retval = PAM_AUTH_ERR;
     int i;
@@ -110,49 +109,51 @@ pam_get_confirm_pass(pam_handle_t *pamh, const char **passp, const char *prompt1
     struct pam_response *resp;
 
     /* Grab the already-entered password if we might want to use it.*/
-    if (options & (PAM_OPT_TRY_FIRST_PASS | PAM_OPT_USE_FIRST_PASS)) {
-	if ((retval = pam_get_item(pamh, PAM_AUTHTOK, (const void **)&item)) != PAM_SUCCESS)
-	    return retval;
-    }
+	if (options & (PAM_OPT_TRY_FIRST_PASS | PAM_OPT_USE_FIRST_PASS)) {
 
-    if (item == NULL) {
+		if ((retval = pam_get_item(pamh, PAM_AUTHTOK, (const void **)&item)) != PAM_SUCCESS)
+			return retval;
+	}
+
+	if (item == NULL) {
+		 
       if (options & PAM_OPT_USE_FIRST_PASS)
         return PAM_AUTH_ERR;
 
-    if ((retval = pam_get_item(pamh, PAM_CONV, (const void **)&item)) != PAM_SUCCESS)
-       	    return retval;
+		if ((retval = pam_get_item(pamh, PAM_CONV, (const void **)&item)) != PAM_SUCCESS)
+			return retval;
 
-    conv = (const struct pam_conv *)item;
-    for(i = 0; i < 2; i++)
-   	    msgs[i].msg_style = options & PAM_OPT_ECHO_PASS ? 
-       		PAM_PROMPT_ECHO_ON : PAM_PROMPT_ECHO_OFF;
-    msgs[0].msg = prompt1;
-    msgs[1].msg = prompt2;
-    pmsgs[0] = &msgs[0];
-    pmsgs[1] = &msgs[1];
+		conv = (const struct pam_conv *)item;
+		for(i = 0; i < 2; i++)
+			msgs[i].msg_style = (options & PAM_OPT_ECHO_PASS) ? PAM_PROMPT_ECHO_ON : PAM_PROMPT_ECHO_OFF;
 
-    if((retval = conv->conv(2, pmsgs, &resp, conv->appdata_ptr)) != PAM_SUCCESS)
- 	return retval;     
+		msgs[0].msg = prompt1;
+		msgs[1].msg = prompt2;
+		pmsgs[0] = &msgs[0];
+		pmsgs[1] = &msgs[1];
 
+		if((retval = conv->conv(2, pmsgs, &resp, conv->appdata_ptr)) != PAM_SUCCESS)
+			return retval;     
 
- 	if(!resp)
-  	    return PAM_AUTHTOK_RECOVER_ERR;
- 	if(strcmp(resp[0].resp, resp[1].resp) != 0)
-   	    return PAM_AUTHTOK_RECOVER_ERR;
+		if(!resp)
+			return PAM_AUTHTOK_RECOVER_ERR;
 
-        retval = pam_set_item(pamh, PAM_AUTHTOK, resp[0].resp);
-   	memset(resp[0].resp, 0, strlen(resp[0].resp));
-   	memset(resp[1].resp, 0, strlen(resp[1].resp));
-   	free(resp[0].resp);
-   	free(resp[1].resp);
-   	free(resp);
+		if(strcmp(resp[0].resp, resp[1].resp) != 0)
+			return PAM_AUTHTOK_RECOVER_ERR;
 
-	if(retval == PAM_SUCCESS) {
-    	    item = NULL;
-    	    retval = pam_get_item(pamh, PAM_AUTHTOK, (const void **)&item);
+		retval = pam_set_item(pamh, PAM_AUTHTOK, resp[0].resp);
+		memset(resp[0].resp, 0, strlen(resp[0].resp));
+		memset(resp[1].resp, 0, strlen(resp[1].resp));
+		free(resp[0].resp);
+		free(resp[1].resp);
+		free(resp);
+
+		if(retval == PAM_SUCCESS) {
+			item = NULL;
+			retval = pam_get_item(pamh, PAM_AUTHTOK, (const void **)&item);
+		}
 	}
-     }
-     *passp = item;
+	*passp = item;
 
-    return retval;
+	return retval;
 }

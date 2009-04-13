@@ -172,6 +172,7 @@ modopt_t * mod_options(int argc, const char **argv) {
 	modopt->query_session_close = NULL;
    modopt->port = strdup("5432");
    modopt->debug = 0;
+   modopt->std_flags = 0;
 
    for(i=0;i<argc;i++) {
 
