@@ -220,12 +220,50 @@ modopt_t * mod_options(int argc, const char **argv) {
 
 	read_config_file(modopt);
 
+	/* 
+	 * If the required queries are no given by the user
+	 * we create a default one based the given table and columns
+	 */
 	if(modopt->query_auth == NULL) {
 
 		if(modopt->column_pwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
 
-			modopt->query_auth = malloc(32+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
+			modopt->query_auth = (char *) malloc(32+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
 			sprintf(modopt->query_auth, "select %s from %s where %s = %%u", modopt->column_pwd, modopt->table, modopt->column_user);
+
+		}
+
+	}
+
+	if(modopt->query_acct == NULL) {
+
+		if(modopt->column_expired != NULL && modopt->column_pwd != NULL && modopt->column_newpwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
+
+			modopt->query_acct = (char *) malloc(96+2*strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user)+2*strlen(modopt->column_expired)+2*strlen(modopt->column_newpwd));
+			sprintf(modopt->query_acct, "select (%s = 'y' OR %s = '1'), (%s = 'y' OR %s = '1'), (%s IS NULL OR %s = '') from %s where %s = %%u", modopt->column_expired,  modopt->column_expired, modopt->column_newpwd, modopt->column_newpwd, modopt->column_pwd, modopt->column_pwd, modopt->table, modopt->column_user);
+
+		/* Expired column is null */
+		} else if(modopt->column_pwd != NULL && modopt->column_newpwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
+
+			modopt->query_acct = (char *) malloc(96+2*strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user)+2*strlen(modopt->column_newpwd));
+			sprintf(modopt->query_acct, "select false, (%s = 'y' OR %s = '1'), (%s IS NULL OR %s = '') from %s where %s = %%u", modopt->column_newpwd, modopt->column_newpwd, modopt->column_pwd, modopt->column_pwd, modopt->table, modopt->column_user);
+
+		/* Newpwd column is null */
+		} else if(modopt->column_expired != NULL && modopt->column_pwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
+
+			modopt->query_acct = (char *) malloc(96+2*strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user)+2*strlen(modopt->column_expired));
+			sprintf(modopt->query_acct, "select (%s = 'y' OR %s = '1'), false, (%s IS NULL OR %s = '') from %s where %s = %%u", modopt->column_newpwd, modopt->column_newpwd, modopt->column_pwd, modopt->column_pwd, modopt->table, modopt->column_user);
+
+		}
+
+	}
+
+	if(modopt->query_pwd == NULL) {
+
+		if(modopt->column_pwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
+
+			modopt->query_auth = (char *) malloc(40+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
+			sprintf(modopt->query_auth, "update %s set %s = %%p where %s = %%u", modopt->table, modopt->column_pwd, modopt->column_user);
 
 		}
 

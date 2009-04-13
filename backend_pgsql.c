@@ -97,7 +97,6 @@ build_conninfo(modopt_t *options)
     /* SAFE */
     strncat(str, "dbname=", strlen("dbname="));
     strncat(str, options->db, strlen(options->db));
-	 printf("a\n");
 
 	if(options->host) {
 		strncat(str, " host=", strlen(" host="));
