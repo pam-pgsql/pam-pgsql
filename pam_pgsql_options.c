@@ -283,8 +283,8 @@ modopt_t * mod_options(int argc, const char **argv) {
 
 		if(modopt->column_pwd != NULL && modopt->table != NULL && modopt->column_user != NULL) {
 
-			modopt->query_auth = (char *) malloc(40+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
-			sprintf(modopt->query_auth, "update %s set %s = %%p where %s = %%u", modopt->table, modopt->column_pwd, modopt->column_user);
+			modopt->query_pwd = (char *) malloc(40+strlen(modopt->column_pwd)+strlen(modopt->table)+strlen(modopt->column_user));
+			sprintf(modopt->query_pwd, "update %s set %s = %%p where %s = %%u", modopt->table, modopt->column_pwd, modopt->column_user);
 
 		}
 
