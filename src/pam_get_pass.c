@@ -34,7 +34,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <security/pam_modules.h>
-#include "pam_mod_misc.h"
+#include "pam_pgsql_options.h"
 
 static int
 pam_conv_pass(pam_handle_t *pamh, int pam_item, const char *prompt, int options)

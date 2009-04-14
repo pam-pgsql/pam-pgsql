@@ -28,62 +28,6 @@
 
 /* very private: used only in get_module_options */
 char *
-build_connect_string(struct module_options *options)
-{
-    int len;
-    char *str;
-
-    len = strlen(options->database) + strlen(" dbname=") 
-	+ (options->db_host ? (strlen(options->db_host) + strlen(" host=")) : 0)
-	+ (options->db_port ? (strlen(options->db_port) + strlen(" port=")) : 0)
-	+ (options->db_timeout ? (strlen(options->db_timeout) + strlen(" connect_timeout=")) : 0) 
-	+ (options->db_user ? (strlen(options->db_user) + strlen(" user=")) : 0)
-	+ (options->db_password ? (strlen(options->db_password) + strlen(" password=")) : 0)
-	+ 1;
-
-    str = (char *) malloc(len);
-    memset(str, 0, len);
-
-    if(str == NULL)
-	return NULL;
-	
-    /* SAFE */
-    strncat(str, "dbname=", strlen("dbname="));
-    strncat(str, options->database, strlen(options->database));
-    if(options->db_host) {
-	strncat(str, " host=", strlen(" host="));
-	strncat(str, options->db_host, strlen(options->db_host));
-    }
-    if(options->db_port) {
-	strncat(str, " port=", strlen(" port="));
-	strncat(str, options->db_port, strlen(options->db_port));
-    }    
-    if(options->db_timeout) {
-	strncat(str, " connect_timeout=", strlen(" connect_timeout="));
-	strncat(str, options->db_timeout, strlen(options->db_timeout));
-    }
-    if(options->db_user) {
-	strncat(str, " user=", strlen(" user="));
-	strncat(str, options->db_user, strlen(options->db_user));
-    }
-    if(options->db_password) {
-	strncat(str, " password=", strlen(" password="));
-	strncat(str, options->db_password, strlen(options->db_password));
-    }
-    return str;
-}
-
-int
-options_valid(struct module_options *options)
-{
-	if (options->pg_conn_str == 0 || options->auth_query == 0) {
-		SYSLOG("the database connection string and auth_query options are required.");
-		return PAM_AUTH_ERR;
-	}
-	return PAM_SUCCESS;
-}
-
-char *
 build_conninfo(modopt_t *options)
 {
     char *str;
@@ -127,18 +71,6 @@ build_conninfo(modopt_t *options)
 }
 
 /* private: open connection to PostgreSQL */
-PGconn *
-pg_connect(struct module_options *options)
-{
-	PGconn *conn;
-	conn = PQconnectdb(options->pg_conn_str);
-	if(PQstatus(conn) != CONNECTION_OK) {
-		SYSLOG("PostgreSQL connection failed: '%s'", PQerrorMessage(conn));
-		return NULL;
-	}
-	return conn;
-}
-
 PGconn *
 db_connect(modopt_t *options)
 {
@@ -307,35 +239,6 @@ i64c(int i)
 
 /* authenticate user and passwd against database */
 int
-auth_verify_password(const char *service, const char *user, const char *passwd, const char *rhost,
-                     struct module_options *options)
-{
-	PGresult *res;
-	PGconn *conn;
-	int rc;
-	char *tmp;
-
-	if(!(conn = pg_connect(options)))
-		return PAM_AUTH_ERR;
-
-	DBGLOG("query: %s", options->auth_query);
-	rc = PAM_AUTH_ERR;	
-	if(pg_execParam(conn, &res, options->auth_query, service, user, passwd, rhost) == PAM_SUCCESS) {
-		if(PQntuples(res) == 0) {
-			rc = PAM_USER_UNKNOWN;
-		} else {
-			char *stored_pw = PQgetvalue(res, 0, 0);
-			if (!strcmp(stored_pw, (tmp = encrypt_password(options, passwd, stored_pw)))) rc = PAM_SUCCESS; 
-			free (tmp);
-		}
-		PQclear(res);
-	}
-	PQfinish(conn);
-	return rc;
-}
-
-
-int
 backend_authenticate(const char *service, const char *user, const char *passwd, const char *rhost, modopt_t *options)
 {
 	PGresult *res;
@@ -363,83 +266,6 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 }
 
 /* private: encrypt password using the preferred encryption scheme */
-char *
-encrypt_password(struct module_options *options, const char *pass, const char *salt)
-{
-	char *s = NULL;
-
-	switch(options->pw_type) {
-		case PW_CRYPT:
-		case PW_CRYPT_MD5:
-			if (salt==NULL) {
-				s = strdup(crypt(pass, crypt_make_salt(options)));
-			} else {
-				s = strdup(crypt(pass, salt));
-			}
-		break;
-		case PW_MD5: {
-			char *buf;
-			int buf_size;
-			MHASH handle;
-			unsigned char *hash;
-			handle = mhash_init(MHASH_MD5);
-			if(handle == MHASH_FAILED) {
-				SYSLOG("could not initialize mhash library!");
-			} else {
-				unsigned int i;
-				mhash(handle, pass, strlen(pass));
-				hash = mhash_end(handle);
-				if (hash != NULL) {
-					buf_size = (mhash_get_block_size(MHASH_MD5) * 2)+1;
-					buf = (char *)malloc(buf_size);
-					bzero(buf, buf_size);
-
-					for(i = 0; i < mhash_get_block_size(MHASH_MD5); i++) {
-						sprintf(&buf[i * 2], "%.2x", hash[i]);
-					}
-					free(hash);
-					s = buf;
-				} else {
-					s = strdup("!");
-				}
-			}
-		}
-		break;
-		case PW_SHA1: {
-			char *buf;
-			int buf_size;
-			MHASH handle;
-			unsigned char *hash;
-			handle = mhash_init(MHASH_SHA1);
-			if(handle == MHASH_FAILED) {
-				SYSLOG("could not initialize mhash library!");
-			} else {
-				unsigned int i;
-				mhash(handle, pass, strlen(pass));
-				hash = mhash_end(handle);
-				if (hash != NULL) {
-					buf_size = (mhash_get_block_size(MHASH_SHA1) * 2)+1;
-					buf = (char *)malloc(buf_size);
-					bzero(buf, buf_size);
-
-					for(i = 0; i < mhash_get_block_size(MHASH_SHA1); i++) {
-						sprintf(&buf[i * 2], "%.2x", hash[i]);
-					}
-					free(hash);
-					s = buf;
-				} else {
-					s = strdup("!");
-				}
-			}
-		}
-		break;
-		case PW_CLEAR:
-		default:
-			s = strdup(pass);
-	}
-	return s;
-}
-
 char *
 password_encrypt(modopt_t *options, const char *pass, const char *salt)
 {
@@ -525,28 +351,6 @@ crypt_makesalt(pw_scheme scheme)
 	struct timeval now;
 
 	if(scheme==PW_CRYPT){
-		len=2;
-		pos=0;
-	} else { /* PW_CRYPT_MD5 */
-		strcpy(result,"$1$");
-		len=11;
-		pos=3;
-	}
-	gettimeofday(&now,NULL);
-	srandom(now.tv_sec*10000+now.tv_usec/100+clock());
-	while(pos<len)result[pos++]=i64c(random()&63);
-	result[len]=0;
-	return result;
-}
-
-char *
-crypt_make_salt(struct module_options *options)
-{
-	static char result[12];
-	int len,pos;
-	struct timeval now;
-
-	if(options->pw_type==PW_CRYPT){
 		len=2;
 		pos=0;
 	} else { /* PW_CRYPT_MD5 */

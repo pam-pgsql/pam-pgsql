@@ -18,7 +18,6 @@
 #define PAM_SM_ACCOUNT
 #define PAM_SM_PASSWORD
 #include <security/pam_modules.h>
-#include "pam_mod_misc.h"
 
 #define PASSWORD_PROMPT         "Password: "
 #define PASSWORD_PROMPT_NEW	    "New password: "
