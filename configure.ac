@@ -3,22 +3,27 @@ dnl Configure template for pam_pgsql
 AC_PREREQ([2.63])
 AC_INIT([pam-pgsql], 0.7,[http://sourceforge.net/tracker/?func=add&group_id=62198&atid=499727], pam-pgsql)
 
-AC_CONFIG_SRCDIR([pam_pgsql.c])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
-AM_INIT_AUTOMAKE(pam_sm_authenticate)
+AM_MAINTAINER_MODE
 
-#AM_INIT_AUTOMAKE([dist-bzip2])
+AM_INIT_AUTOMAKE(pam_pgsql, pam_sm_authenticate)
 
+AC_USE_SYSTEM_EXTENSIONS
 #check programs
 AC_PROG_CC
+AC_PROG_INSTALL
 AC_PROG_MAKE_SET
+
+AM_PROG_LIBTOOL
 
 dnl Checks for libraries.
 AC_CHECK_LIB(pam, pam_get_user)
 
 dnl Checks for header files.
-AC_PATH_X
+#AC_PATH_X
 AC_FUNC_ALLOCA
 AC_HEADER_RESOLV
 AC_CHECK_HEADERS([syslog.h netdb.h malloc.h memory.h stddef.h stdint.h stdlib.h string.h unistd.h])
@@ -40,16 +45,12 @@ AC_TYPE_UINT8_T
 AC_CHECK_TYPES([ptrdiff_t])
 
 # Checks for library functions.
-AM_GNU_GETTEXT
-AC_FUNC_ERROR_AT_LINE
-AC_FUNC_FORK
 AC_FUNC_FSEEKO
 AC_FUNC_MALLOC
 AC_FUNC_REALLOC
-AC_CHECK_FUNCS([atexit bzero gethostbyname inet_ntoa memmove memset mkdir pow regcomp socket sqrt strcasecmp strchr strdup strerror strndup strrchr strstr strtol strtoul])
+AC_CHECK_FUNCS([atexit bzero gethostbyname memset mkdir pow socket sqrt strcasecmp strchr strdup strerror strndup strrchr strstr strtol strtoul])
 
-AC_CONFIG_FILES([Makefile])
-AC_CONFIG_SUBDIR
+AC_CONFIG_FILES([Makefile src/Makefile])
 
 AC_MSG_CHECKING(for PostgreSQL headers)
 for d in /usr /usr/local /usr/local/pgsql; do
@@ -118,6 +119,8 @@ AC_SUBST(PAM_MISC_LD)
 AC_SUBST(MHASH_LD)
 AC_SUBST(DEBUG)
 AC_SUBST(DEBUG_LIB)
+AC_SUBST([moduledir])
+
 AC_ARG_WITH(debug, 
 [  --with-debug            Enable debugging routines], 
 [AC_DEFINE([DEBUG], [], [Debug]) 

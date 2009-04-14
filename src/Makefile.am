@@ -1,61 +1,20 @@
-AUTOMAKE_OPTIONS = foreign
+AM_CFLAGS = -Wall -pedantic
 
-CFLAGS=	-O2 -frename-registers -fstrict-aliasing -fPIC -DPIC -Wall -W -Wdisabled-optimization -Wredundant-decls -Wmissing-format-attribute -Wmissing-noreturn -D_GNU_SOURCE ${INCLUDE} ${DEBUG}
+#bin_PROGRAMS = pam_pgsql.so
 
-LIBSRC=     pam_pgsql.c
-LIBOBJ=     pam_pgsql.o pam_get_pass.o pam_std_option.o pam_get_service.o backend_pgsql.o pam_pgsql_options.o
-LIBLIB=     pam_pgsql.so
+lib_LTLIBRARIES = pam_pgsql.la
+#pam_pgsql_so_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
+#pam_pgsql_sodir = @moduledir@
+#pam_pgsql_la_LBADD = -lpam -lpq @PAM_MISC_LD@ @MHASH_LD@ 
+pam_pgsql_la_LIBADD = -lpam -lpq @PAM_MISC_LD@ @MHASH_LD@ 
+pam_pgsql_la_LDFLAGS = -module -export-dynamic $(LDFLAGS)
+pam_pgsql_la_SOURCES = \
+							  pam_pgsql.c \
+							  pam_pgsql.h \
+							  pam_pgsql_options.c \
+							  pam_pgsql_options.h \
+							  backend_pgsql.c \
+							  backend_pgsql.h \
+							  pam_get_service.c \
+							  pam_get_pass.c
 
-DISTDIR=    pam-pgsql-0.7
-ROOTDIR=	
-
-LINK=		@PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
-LDLIBS=		${LINK} -lpam -lpq @PAM_MISC_LD@ @MHASH_LD@
-INCLUDE=	@PGSQL_INC@ @MHASH_INC@
-DEBUG=      @DEBUG@
-
-
-all: ${LIBLIB}
-
-DISTDIRS=
-DISTFILES= acconfig.h README pam_get_pass.c pam_get_service.c pam_mod_misc.h \
-	pam_pgsql.c pam_pgsql.h pam_std_option.c test.c Makefile.in configure.in \
-	backend_pgsql.c backend_pgsql.h pam_pgsql_options.c pam_pgsql_options.h \
-	config.h.in install-sh config.sub config.guess install-module configure \
-	CREDITS COPYRIGHT CHANGELOG
-    
-distfiles: ${DISTFILES}
-
-${DISTDIR}.tar.gz: distfiles
-	mkdir -p ${DISTDIR}
-	for d in ${DISTDIRS}; do \
-		mkdir -p ${DISTDIR}/$$d; \
-	done
-	for f in ${DISTFILES}; do \
-		cp -pR $$f ${DISTDIR}/$$f; \
-	done
-	tar -czvvf ${DISTDIR}.tar.gz ${DISTDIR}
-	rm -rf ${DISTDIR}
-
-dist: ${DISTDIR}.tar.gz
-
-${LIBLIB}: ${LIBOBJ}
-	${CC} ${CFLAGS} ${INCLUDE} -shared -o $@ ${LIBOBJ} ${LDLIBS} 
-
-test: test.c
-	${CC} ${CFLAGS} -o $@ test.c ${LDLIBS}
-
-install:
-	@(ROOTDIR=${ROOTDIR}; ./install-module @host_os@)
-	
-clean:
-	rm -f ${LIBOBJ} ${LIBLIB} core test *~ 
-	rm -f ${DISTDIR}.tar.gz
-
-dist-clean: distclean
-distclean: clean
-	rm -f config.cache config.log config.status config.h
-	rm -f Makefile
-
-extraclean: clean
-	rm -f *.a *.o *.so *.bak 
