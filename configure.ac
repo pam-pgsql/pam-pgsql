@@ -9,7 +9,7 @@ AC_CONFIG_HEADERS([config.h])
 
 AM_MAINTAINER_MODE
 
-AM_INIT_AUTOMAKE(pam_pgsql, pam_sm_authenticate)
+AM_INIT_AUTOMAKE(pam_pgsql, 0.7)
 
 AC_USE_SYSTEM_EXTENSIONS
 #check programs
