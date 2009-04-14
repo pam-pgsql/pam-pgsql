@@ -17,11 +17,12 @@
 #include <mhash.h>
 #include <time.h>
 #include <sys/time.h>
-#include <crypt.h>
 #include <sys/types.h>
+#define _XOPEN_SOURCE
 #include <unistd.h>
 #include <netdb.h>
 #include <libpq-fe.h>
+#include <security/pam_appl.h>
 
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"

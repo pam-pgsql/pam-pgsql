@@ -34,7 +34,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <security/pam_modules.h>
+#include <security/pam_appl.h>
 #include "pam_pgsql_options.h"
+
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#endif
+
+#if (defined(__FreeBSD__) && __FreeBSD_version > 500000)
+#define PAM_AUTHTOK_RECOVER_ERR PAM_AUTHTOK_RECOVERY_ERR
+#endif
 
 static int
 pam_conv_pass(pam_handle_t *pamh, int pam_item, const char *prompt, int options)

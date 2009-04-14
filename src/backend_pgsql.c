@@ -18,8 +18,8 @@
 #include <time.h>
 #include <sys/time.h>
 #include <libpq-fe.h>
-#include <crypt.h>
 #include <sys/types.h>
+#define _XOPEN_SOURCE
 #include <unistd.h>
 #include <netdb.h>
 
