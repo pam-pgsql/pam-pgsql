@@ -9,8 +9,8 @@ begin;
 
 		username varchar(255) UNIQUE NOT NULL,
 		password varchar(200),
-		expired timestamptz,
-		newtok varchar(200)
+		expired boolean,
+		newtok boolean
 
 	);
 
