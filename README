@@ -25,20 +25,20 @@ Compilation & Installation
 pam_pgsql is now autoconf'ed, thus, compiling should be a matter
 of:
 
+    $ ./autogen.sh
     $ ./configure
     $ make
     $ make install
 
-Compilation has been tested on Debian GNU/Linux and FreeBSD 4.0/5.0
+Compilation has been tested on Debian GNU/Linux, Arch Linux and FreeBSD 7.2
 
 On Debian, you will need the libpam0g-dev, postgresql-dev and libmhash-dev
 packages to compile.
 
-On FreeBSD you will have to install the postgresql/postgresql7 port, and
+On FreeBSD you will have to install the postgresql/postgresql8*-client port, and
 the security/mhash port.
 
-See test.c for an example application that authenticates using
-this module.
+See authenticate.c and chpass.c for an example application that authenticates and change password using this module.
 
 This version only works with PostgreSQL versions 7.4 or newer.
 
@@ -72,7 +72,7 @@ user_column = user_name
 pwd_column = user_password
 expired_column = acc_expired
 newtok_column = acc_new_pwreq
-debug
+debug = 1
 
 Note that for backwards compatibility with earlier versions, options specified
 in the configuration file can be supplied as module arguments as well. Module
