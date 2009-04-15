@@ -1,0 +1,20 @@
+#!/bin/sh
+# Install the .so into its appropriate location
+
+case "$1" in
+    freebsd*)
+    echo "FreeBSD: Installing pam_pgsql.so to /usr/lib"
+    destdir=usr/lib
+    ;;
+    linux*)
+    echo "Linux: Installing pam_pgsql.so to /lib/security"
+    destdir=lib/security
+    ;;
+    *)
+    echo "Unknown: Installing pam_pgsql.so to /lib/security"
+    destdir=lib/security
+    ;;
+esac
+
+install -d -m 755 -o root $ROOTDIR/$destdir
+install -c -m 644 -o root .libs/pam_pgsql.so* $ROOTDIR/$destdir

@@ -19,3 +19,5 @@ pam_pgsql_la_SOURCES = \
 							  pam_get_pass.c
 
 
+install:
+	@(ROOTDIR=${ROOTDIR}; ./install-module @host_os@)
