@@ -75,9 +75,10 @@ PGconn *
 db_connect(modopt_t *options)
 {
 	PGconn *conn;
-	char *conninfo;
-	conninfo = build_conninfo(options);
-	conn = PQconnectdb(conninfo);
+	if(options->connstr == NULL)
+		options->connstr = build_conninfo(options);
+
+	conn = PQconnectdb(options->connstr);
 	if(PQstatus(conn) != CONNECTION_OK) {
 		SYSLOG("PostgreSQL connection failed: '%s'", PQerrorMessage(conn));
 		return NULL;

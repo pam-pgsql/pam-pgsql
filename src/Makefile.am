@@ -3,7 +3,7 @@ AM_CFLAGS = -Wall
 
 INCLUDES = @PGSQL_INC@ @MHASH_INC@ 
 
-lib_LTLIBRARIES = pam_pgsql.la
+noinst_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
 #pam_pgsql_ladir = @moduledir@
 pam_pgsql_la_LIBADD = -lpam -lpq @PAM_MISC_LD@ @MHASH_LD@ 

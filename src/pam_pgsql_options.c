@@ -120,7 +120,7 @@ read_config_file(modopt_t *options)
 		fclose(fp);
 
 	} else {
-		SYSLOG("no access");
+		SYSLOG("no access for config file");
 	}
 
 	return;
@@ -150,6 +150,7 @@ modopt_t * mod_options(int argc, const char **argv) {
 	struct opttab *p;
 
 	/* Initializing values */
+   modopt->connstr = NULL;
    modopt->db = NULL;
    modopt->host = NULL;
    modopt->user = NULL;
@@ -192,7 +193,9 @@ modopt_t * mod_options(int argc, const char **argv) {
 
          if( strcmp(option, "host") == 0 ) {
             modopt->host = strdup(value);
-         } else if( strcmp(option, "fileconf") == 0 ) {
+         } else if( strcmp(option, "connect") == 0 ) {
+            modopt->connstr = strdup(value);
+         } else if( strcmp(option, "config_file") == 0 ) {
             modopt->fileconf = strdup(value);
          } else if( strcmp(option, "database") == 0 ) {
             modopt->db = strdup(value);

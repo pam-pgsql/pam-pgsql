@@ -50,7 +50,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([atexit bzero gethostbyname memset mkdir pow socket sqrt strcasecmp strchr strdup strerror strndup strrchr strstr strtol strtoul])
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
 
 AC_MSG_CHECKING(for PostgreSQL headers)
 for d in /usr /usr/local /usr/local/pgsql; do
@@ -111,11 +111,15 @@ LDFLAGS="$old_LDFLAGS"
 if test "`uname`" = "Linux" >/dev/null 2>/dev/null; then
     # Debian needs this
     PAM_MISC_LD="-lpam_misc"
+	 INSTALLPAM="/lib/security/"
+	 AC_DEFINE([LINUX], [1], [It is a linux machine])
 else
     PAM_MISC_LD=""
+	 INSTALLPAM="/usr/lib/"
 fi
 
 AC_SUBST(PAM_MISC_LD)
+AC_SUBST(INSTALLPAM)
 AC_SUBST(MHASH_LD)
 AC_SUBST(DEBUG)
 AC_SUBST(DEBUG_LIB)

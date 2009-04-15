@@ -29,6 +29,7 @@ typedef enum {
 
 typedef struct modopt_s {
 
+   char *connstr;
    char *fileconf;
    char *host;
    char *db;
