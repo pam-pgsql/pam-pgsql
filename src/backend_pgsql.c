@@ -26,6 +26,7 @@
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"
 #include "md5.h"
+#include "sha1.h"
 
 /* very private: used only in get_module_options */
 char *
@@ -307,31 +308,25 @@ password_encrypt(modopt_t *options, const char *pass, const char *salt)
 		}
 		break;
 		case PW_SHA1: {
-			char *buf;
-			int buf_size;
-			MHASH handle;
-			unsigned char *hash;
-			handle = mhash_init(MHASH_SHA1);
-			if(handle == MHASH_FAILED) {
-				SYSLOG("could not initialize mhash library!");
-			} else {
-				unsigned int i;
-				mhash(handle, pass, strlen(pass));
-				hash = mhash_end(handle);
-				if (hash != NULL) {
-					buf_size = (mhash_get_block_size(MHASH_SHA1) * 2)+1;
-					buf = (char *)malloc(buf_size);
-					bzero(buf, buf_size);
 
-					for(i = 0; i < mhash_get_block_size(MHASH_SHA1); i++) {
-						sprintf(&buf[i * 2], "%.2x", hash[i]);
-					}
-					free(hash);
-					s = buf;
-				} else {
-					s = strdup("!");
-				}
+			SHA1Context ctx;
+			char *buf;
+			unsigned char hash[20]; /* 20 is the sha1 block size */
+			int i;
+
+			bzero(&hash, 20);
+
+			SHA1Reset(&ctx);
+			SHA1Input(&ctx, (unsigned char const *) pass, strlen(pass));
+			SHA1Result(&ctx);
+
+			buf = (char *) malloc(41); /* 40 bytes + 1 byte for \0 */
+
+			for(i = 0; i < 5; i++) { 
+				sprintf(&buf[i * 8], "%.8x", ctx.Message_Digest[i]);
 			}
+			s = buf;
+
 		}
 		break;
 		case PW_CLEAR:

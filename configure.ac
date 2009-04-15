@@ -90,24 +90,6 @@ LDFLAGS="$old_LDFLAGS"
 
 AC_SUBST(PGSQL_LIB) 
 
-AC_MSG_CHECKING(for mhash headers)
-for d in /usr /usr/local; do
-    test -f $d/include/mhash.h && {
-        AC_SUBST(MHASH_INC)
-        MHASH_INC="-I$d/include"
-        MHASH_DIR="$d"
-        AC_MSG_RESULT($d/include)
-    }
-done
-
-old_LDFLAGS="$LDFLAGS"
-LDFLAGS="$LDFLAGS -L$MHASH_DIR/lib"
-AC_CHECK_LIB(mhash, mhash_get_block_size, 
-    [AC_SUBST(MHASH_LIB) 
-        MHASH_LIB="-L$MHASH_DIR/lib"; MHASH_LD="-lmhash"],
-    [AC_MSG_ERROR(could not determine mhash library location)])
-LDFLAGS="$old_LDFLAGS"
-
 if test "`uname`" = "Linux" >/dev/null 2>/dev/null; then
     # Debian needs this
     PAM_MISC_LD="-lpam_misc"
@@ -120,7 +102,6 @@ fi
 
 AC_SUBST(PAM_MISC_LD)
 AC_SUBST(INSTALLPAM)
-AC_SUBST(MHASH_LD)
 AC_SUBST(DEBUG)
 AC_SUBST(DEBUG_LIB)
 AC_SUBST([moduledir])
