@@ -39,8 +39,10 @@ build_conninfo(modopt_t *options)
     memset(str, 0, 512);
 
     /* SAFE */
-    strncat(str, "dbname=", strlen("dbname="));
-    strncat(str, options->db, strlen(options->db));
+	 if(options->db) {
+   	 strncat(str, "dbname=", strlen("dbname="));
+   	 strncat(str, options->db, strlen(options->db));
+	 }
 
 	if(options->host) {
 		strncat(str, " host=", strlen(" host="));

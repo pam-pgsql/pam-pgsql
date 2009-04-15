@@ -57,6 +57,8 @@ read_config_file(modopt_t *options)
 
 			if(!strcmp(buffer, "auth_query")) {
 				options->query_auth = strdup(val); 
+         } else if( strcmp(buffer, "connect") == 0 ) {
+            options->connstr = strdup(val);
 			} else if(!strcmp(buffer, "auth_succ_query")) {
 				options->query_auth_succ = strdup(val); 
 			} else if(!strcmp(buffer, "auth_fail_query")) {
@@ -193,8 +195,6 @@ modopt_t * mod_options(int argc, const char **argv) {
 
          if( strcmp(option, "host") == 0 ) {
             modopt->host = strdup(value);
-         } else if( strcmp(option, "connect") == 0 ) {
-            modopt->connstr = strdup(value);
          } else if( strcmp(option, "config_file") == 0 ) {
             modopt->fileconf = strdup(value);
          } else if( strcmp(option, "database") == 0 ) {
