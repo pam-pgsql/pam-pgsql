@@ -8,6 +8,7 @@
  * William Grzybowski <william@agencialivre.com.br>
  */
 
+#define _XOPEN_SOURCE 500
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -19,7 +20,6 @@
 #include <sys/time.h>
 #include <libpq-fe.h>
 #include <sys/types.h>
-#define _XOPEN_SOURCE
 #include <unistd.h>
 #include <netdb.h>
 
