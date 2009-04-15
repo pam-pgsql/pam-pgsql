@@ -132,7 +132,7 @@ replaced with NULL
     debug               - this is a standard module option that will enable
                           debug output to syslog (takes no values)
     pw_type             - specifies the password encryption scheme, can be one
-                          of 'clear', 'md5', 'crypt', or 'crypt_md5'. the
+                          of 'clear', 'md5', 'sha1', 'crypt', or 'crypt_md5'. the
                           difference between 'md5' and 'crypt_md5' is that
                           'md5' uses libmhash for hashing while 'crypt_md5'
                           uses crypt() with a special salt to select md5

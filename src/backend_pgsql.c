@@ -25,6 +25,7 @@
 
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"
+#include "md5.h"
 
 /* very private: used only in get_module_options */
 char *
@@ -284,31 +285,25 @@ password_encrypt(modopt_t *options, const char *pass, const char *salt)
 			}
 		break;
 		case PW_MD5: {
-			char *buf;
-			int buf_size;
-			MHASH handle;
-			unsigned char *hash;
-			handle = mhash_init(MHASH_MD5);
-			if(handle == MHASH_FAILED) {
-				SYSLOG("could not initialize mhash library!");
-			} else {
-				unsigned int i;
-				mhash(handle, pass, strlen(pass));
-				hash = mhash_end(handle);
-				if (hash != NULL) {
-					buf_size = (mhash_get_block_size(MHASH_MD5) * 2)+1;
-					buf = (char *)malloc(buf_size);
-					bzero(buf, buf_size);
 
-					for(i = 0; i < mhash_get_block_size(MHASH_MD5); i++) {
-						sprintf(&buf[i * 2], "%.2x", hash[i]);
-					}
-					free(hash);
-					s = buf;
-				} else {
-					s = strdup("!");
-				}
+			MD5_CTX ctx;
+			char *buf;
+			unsigned char hash[16]; /* 16 is the md5 block size */
+			int i;
+
+			bzero(&hash, 16);
+
+			MD5Init(&ctx);
+			MD5Update(&ctx, (unsigned char const *) pass, strlen(pass));
+			MD5Final(hash, &ctx);
+
+			buf = (char *) malloc(33); /* 32 bytes + 1 byte for \0 */
+
+			for(i = 0; i < 16; i++) { 
+				sprintf(&buf[i * 2], "%.2x", hash[i]);
 			}
+			s = buf;
+
 		}
 		break;
 		case PW_SHA1: {

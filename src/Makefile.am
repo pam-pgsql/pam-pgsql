@@ -16,7 +16,9 @@ pam_pgsql_la_SOURCES = \
 							  backend_pgsql.c \
 							  backend_pgsql.h \
 							  pam_get_service.c \
-							  pam_get_pass.c
+							  pam_get_pass.c \
+							  md5.c \
+							  md5.h
 
 
 install:
