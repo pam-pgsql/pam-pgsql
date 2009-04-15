@@ -2,12 +2,21 @@
  * Sample application to test the module
  */
 
-#include <security/pam_appl.h>
-#include <security/pam_misc.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <security/pam_appl.h>
+#ifdef __FreeBSD__
+#include <security/openpam.h>
+#else
+#include <security/pam_misc.h>
+#endif
 
 static struct pam_conv conv = {
+#ifdef __FreeBSD__
+	openpam_ttyconv,
+#else
 	misc_conv,
+#endif
 	NULL
 };
 

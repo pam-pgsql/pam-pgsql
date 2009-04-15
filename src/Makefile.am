@@ -7,7 +7,7 @@ lib_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
 #pam_pgsql_ladir = @moduledir@
 pam_pgsql_la_LIBADD = -lpam -lpq @PAM_MISC_LD@ @MHASH_LD@ 
-pam_pgsql_la_LDFLAGS = -module -export-dynamic $(LDFLAGS)
+pam_pgsql_la_LDFLAGS = -module -export-dynamic $(LDFLAGS) @PGSQL_LIB@ @MHASH_LIB@ @DEBUG_LIB@
 pam_pgsql_la_SOURCES = \
 							  pam_pgsql.c \
 							  pam_pgsql.h \

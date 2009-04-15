@@ -4,13 +4,22 @@
  * William Grzybowski <william@agencialivre.com.br>
  */
 
-#include <security/pam_appl.h>
-#include <security/pam_misc.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <security/pam_appl.h>
+#ifdef __FreeBSD__
+#include <security/openpam.h>
+#else
+#include <security/pam_misc.h>
+#endif
 
 static struct pam_conv conv = {
-    misc_conv,
-    NULL
+#ifdef __FreeBSD__
+        openpam_ttyconv,
+#else
+        misc_conv,
+#endif
+        NULL
 };
 
 int main(int argc, char **argv) {
