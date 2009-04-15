@@ -2,7 +2,7 @@
 
 echo "Generating configure files... may take a while."
 
-autoreconf --install --force && \
+autoreconf --install -v && \
   echo "Preparing was successful if there was no error messages above." && \
   echo "Now type:" && \
   echo "  ./configure && make"  && \

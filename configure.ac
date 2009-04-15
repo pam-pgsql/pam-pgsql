@@ -1,6 +1,6 @@
 dnl Configure template for pam_pgsql
 
-AC_PREREQ([2.63])
+AC_PREREQ([2.62])
 AC_INIT([pam-pgsql], 0.7,[http://sourceforge.net/tracker/?func=add&group_id=62198&atid=499727], pam-pgsql)
 
 AC_CONFIG_MACRO_DIR([m4])
@@ -11,8 +11,8 @@ AM_MAINTAINER_MODE
 
 AM_INIT_AUTOMAKE(pam_pgsql, 0.7)
 
-AC_USE_SYSTEM_EXTENSIONS
 #check programs
+AC_DISABLE_STATIC
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET

@@ -1,6 +1,5 @@
-AM_CFLAGS = -Wall -pedantic
-
-#bin_PROGRAMS = pam_pgsql.so
+#AM_CFLAGS = -Wall -pedantic
+AM_CFLAGS = -Wall
 
 lib_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_so_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@ @MHASH_LIB@
