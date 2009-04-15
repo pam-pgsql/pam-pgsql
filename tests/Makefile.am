@@ -5,6 +5,7 @@ noinst_PROGRAMS = authenticate
 
 authenticate_LDADD = @PAM_MISC_LD@ -lpam -lpam_misc
 authenticate_SOURCES = \
-							  authenticate.c
+							  authenticate.c \
+							  chpass.c
 
 
