@@ -9,7 +9,7 @@ AC_CONFIG_HEADERS([config.h])
 
 AM_MAINTAINER_MODE
 
-AM_INIT_AUTOMAKE(pam_pgsql, 0.7)
+AM_INIT_AUTOMAKE(pam-pgsql, 0.7)
 
 #check programs
 AC_DISABLE_STATIC
