@@ -25,18 +25,18 @@ Compilation & Installation
 pam_pgsql is now autoconf'ed, thus, compiling should be a matter
 of:
 
-    $ ./autogen.sh
     $ ./configure
     $ make
     $ make install
 
-Compilation has been tested on Debian GNU/Linux, Arch Linux and FreeBSD 7.2
+Or if you're using a git version, run this command before them all:
 
-On Debian, you will need the libpam0g-dev, postgresql-dev and libmhash-dev
-packages to compile.
+    $ ./autogen.sh
 
-On FreeBSD you will have to install the postgresql/postgresql8*-client port, and
-the security/mhash port.
+Compilation has been tested on Debian GNU/Linux, ArchLinux and FreeBSD 7.2
+
+On Debian, you will need the libpam0g-dev and postgresql-dev packages to compile.
+On FreeBSD you will have to install the postgresql/postgresql8*-client port.
 
 See authenticate.c and chpass.c for an example application that authenticates and change password using this module.
 
