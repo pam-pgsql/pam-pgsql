@@ -3,6 +3,8 @@ AM_CFLAGS = -Wall
 
 INCLUDES = @PGSQL_INC@
 
+EXTRA_DIST = install-module
+
 lib_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@
 #pam_pgsql_ladir = @moduledir@
