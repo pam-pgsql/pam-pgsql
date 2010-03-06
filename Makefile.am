@@ -9,7 +9,7 @@ pammoddir = $(libdir)/security
 pammod_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@
 #pam_pgsql_ladir = @moduledir@
-pam_pgsql_la_LIBADD = -lpam -lpq @PAM_MISC_LD@
+pam_pgsql_la_LIBADD = -lpam -lpq
 pam_pgsql_la_LDFLAGS = -module -export-dynamic -shared $(LDFLAGS_NOUNDEFINED) @DEBUG_LIB@
 pam_pgsql_la_SOURCES = \
 			src/pam_pgsql.c \
@@ -25,10 +25,12 @@ pam_pgsql_la_SOURCES = \
 			src/sha1.c \
 			src/sha1.h
 
+if HAVE_PAM_CONV
 EXTRA_PROGRAMS = authenticate chpass
+endif
 
-authenticate_LDADD = @PAM_MISC_LD@ -lpam
+authenticate_LDADD = -lpam $(PAMCONVLIB)
 authenticate_SOURCES = tests/authenticate.c
 
-chpass_LDADD = @PAM_MISC_LD@ -lpam
+chpass_LDADD = -lpam $(PAMCONVLIB)
 chpass_SOURCES = tests/chpass.c

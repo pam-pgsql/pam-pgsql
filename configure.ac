@@ -32,6 +32,23 @@ AS_IF([test "x$ac_cv_header_security_pam_modules_h" = "xno" \
   AC_MSG_ERROR([Unable to find the PAM library or the PAM header files])
 ])
 
+dnl the two test programs use a default conversation, that is found on
+dnl either libpam_misc (Linux-PAM) or libpam proper (OpenPAM); so try
+dnl to be smart here.
+dnl
+dnl While Linux-PAM is much more widespread, check for OpenPAM first
+dnl as it happened before that users mixed up the libpam_misc with the
+dnl OpenPAM library by mistake.
+
+AC_CHECK_HEADERS([security/openpam.h security/pam_misc.h], [break;])
+AC_CHECK_FUNC([openpam_ttyconv], [PAMCONVLIB=-lpam], [
+  AC_CHECK_LIB([pam_misc], [misc_conv], [PAMCONVLIB=-lpam_misc], [
+    AC_MSG_WARN([Unable to find a compatible PAM conversation, not building tests])
+  ])
+])
+AC_SUBST([PAMCONVLIB])
+AM_CONDITIONAL([HAVE_PAM_CONV], [test "x$PAMCONVLIB" != "x"])
+
 AC_CHECK_HEADERS_ONCE([libpq-fe.h])
 AC_CHECK_LIB([pq], [PQexecParams], [:])
 
@@ -42,18 +59,6 @@ AS_IF([test "x$ac_cv_header_libpq_fe_h" = "xno" \
 
 AC_CONFIG_FILES([Makefile])
 
-if test "`uname`" = "Linux" >/dev/null 2>/dev/null; then
-    # Debian needs this
-    PAM_MISC_LD="-lpam_misc"
-	 INSTALLPAM="/lib/security/"
-	 AC_DEFINE([LINUX], [1], [It is a linux machine])
-else
-    PAM_MISC_LD=""
-	 INSTALLPAM="/usr/lib/"
-fi
-
-AC_SUBST(PAM_MISC_LD)
-AC_SUBST(INSTALLPAM)
 AC_SUBST(DEBUG)
 AC_SUBST(DEBUG_LIB)
 

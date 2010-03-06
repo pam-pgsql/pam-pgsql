@@ -5,17 +5,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <security/pam_appl.h>
-#ifdef __FreeBSD__
+#if HAVE_SECURITY_OPENPAM_H
 #include <security/openpam.h>
-#else
+#elif HAVE_SECURITY_PAM_MISC_H
 #include <security/pam_misc.h>
 #endif
 
 static struct pam_conv conv = {
-#ifdef __FreeBSD__
+#if HAVE_OPENPAM_TTYCONV
 	openpam_ttyconv,
-#else
+#elif HAVE_MISC_CONV
 	misc_conv,
+#else
+# error "No PAM conversation found"
 #endif
 	NULL
 };
