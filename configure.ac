@@ -17,6 +17,8 @@ LT_INIT([disable-static])
 AC_PROG_CC
 
 dnl Checks for libraries.
+AC_SEARCH_LIBS([crypt], [c crypt])
+
 AC_CHECK_HEADERS_ONCE([security/pam_modules.h])
 AC_CHECK_LIB([pam], [pam_get_user], [:])
 
