@@ -5,8 +5,6 @@ dist_doc_DATA = README CHANGELOG COPYRIGHT CREDITS sample.sql
 AM_CFLAGS = -Wall
 
 pammod_LTLIBRARIES = pam_pgsql.la
-#pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@
-#pam_pgsql_ladir = @moduledir@
 pam_pgsql_la_LIBADD = -lpam -lpq
 pam_pgsql_la_LDFLAGS = -module -export-dynamic -shared -avoid-version $(LDFLAGS_NOUNDEFINED)
 pam_pgsql_la_SOURCES = \
