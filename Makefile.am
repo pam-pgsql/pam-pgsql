@@ -10,7 +10,7 @@ pammod_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@
 #pam_pgsql_ladir = @moduledir@
 pam_pgsql_la_LIBADD = -lpam -lpq @PAM_MISC_LD@
-pam_pgsql_la_LDFLAGS = -module -export-dynamic -shared @DEBUG_LIB@
+pam_pgsql_la_LDFLAGS = -module -export-dynamic -shared $(LDFLAGS_NOUNDEFINED) @DEBUG_LIB@
 pam_pgsql_la_SOURCES = \
 			src/pam_pgsql.c \
 			src/pam_pgsql.h \

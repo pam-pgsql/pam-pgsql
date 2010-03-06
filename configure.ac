@@ -16,6 +16,11 @@ LT_INIT([disable-static])
 
 AC_PROG_CC
 
+dnl Make sure that we won't have undefined symbols, when we can
+dnl actually make sure of that (it's not possible on all operating
+dnl systems).
+CC_NOUNDEFINED
+
 dnl Checks for libraries.
 AC_SEARCH_LIBS([crypt], [c crypt])
 
