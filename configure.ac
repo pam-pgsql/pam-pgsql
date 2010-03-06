@@ -59,14 +59,4 @@ AS_IF([test "x$ac_cv_header_libpq_fe_h" = "xno" \
 
 AC_CONFIG_FILES([Makefile])
 
-AC_SUBST(DEBUG)
-AC_SUBST(DEBUG_LIB)
-
-AC_ARG_WITH(debug, 
-[  --with-debug            Enable debugging routines], 
-[AC_DEFINE([DEBUG], [], [Debug]) 
-    AC_CHECK_LIB(efence, malloc, [DEBUG_LIB="-lefence"])
-    DEBUG="-g"],
-[DEBUG=""; DEBUG_LIB=""])
-
 AC_OUTPUT
