@@ -9,7 +9,8 @@ AC_CONFIG_HEADERS([config.h])
 
 AM_MAINTAINER_MODE
 
-AM_INIT_AUTOMAKE(pam-pgsql, 0.7)
+AM_INIT_AUTOMAKE([foreign subdir-objects])
+m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 #check programs
 AC_DISABLE_STATIC
