@@ -12,13 +12,12 @@ AM_MAINTAINER_MODE
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
+LT_INIT([disable-static])
+
 #check programs
-AC_DISABLE_STATIC
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-
-AM_PROG_LIBTOOL
 
 dnl Checks for libraries.
 AC_CHECK_LIB(pam, pam_get_user)
