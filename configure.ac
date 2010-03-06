@@ -14,41 +14,10 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 LT_INIT([disable-static])
 
-#check programs
 AC_PROG_CC
-AC_PROG_INSTALL
-AC_PROG_MAKE_SET
 
 dnl Checks for libraries.
 AC_CHECK_LIB(pam, pam_get_user)
-
-dnl Checks for header files.
-#AC_PATH_X
-AC_FUNC_ALLOCA
-AC_HEADER_RESOLV
-AC_CHECK_HEADERS([syslog.h netdb.h malloc.h memory.h stddef.h stdint.h stdlib.h string.h unistd.h])
-
-# Checks for typedefs, structures, and compiler characteristics.
-AC_TYPE_UID_T
-AC_C_INLINE
-AC_TYPE_INT16_T
-AC_TYPE_INT32_T
-AC_TYPE_INT8_T
-#AC_TYPE_MODE_T
-#AC_TYPE_OFF_T
-AC_TYPE_PID_T
-AC_TYPE_SIZE_T
-AC_TYPE_SSIZE_T
-#AC_TYPE_UINT16_T
-#AC_TYPE_UINT32_T
-#AC_TYPE_UINT8_T
-#AC_CHECK_TYPES([ptrdiff_t])
-
-# Checks for library functions.
-AC_FUNC_FSEEKO
-AC_FUNC_MALLOC
-AC_FUNC_REALLOC
-AC_CHECK_FUNCS([atexit bzero gethostbyname memset mkdir pow socket sqrt strcasecmp strchr strdup strerror strndup strrchr strstr strtol strtoul])
 
 AC_CONFIG_FILES([Makefile])
 
@@ -104,7 +73,6 @@ AC_SUBST(PAM_MISC_LD)
 AC_SUBST(INSTALLPAM)
 AC_SUBST(DEBUG)
 AC_SUBST(DEBUG_LIB)
-AC_SUBST([moduledir])
 
 AC_ARG_WITH(debug, 
 [  --with-debug            Enable debugging routines], 
