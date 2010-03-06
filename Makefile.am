@@ -27,7 +27,7 @@ pam_pgsql_la_SOURCES = \
 			src/sha1.c \
 			src/sha1.h
 
-noinst_PROGRAMS = authenticate chpass
+EXTRA_PROGRAMS = authenticate chpass
 
 authenticate_LDADD = @PAM_MISC_LD@ -lpam
 authenticate_SOURCES = tests/authenticate.c
