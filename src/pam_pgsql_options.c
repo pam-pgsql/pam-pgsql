@@ -135,10 +135,10 @@ modopt_t * mod_options(int argc, const char **argv) {
    modopt_t * modopt = (modopt_t *)malloc(sizeof(modopt_t));
 
 	struct opttab {
-		const char *name;
+		const char name[16];
 		int value;
 	};
-	static struct opttab std_options[] = {
+	static const struct opttab std_options[] = {
 		{ "debug",          PAM_OPT_DEBUG },
 		{ "no_warn",        PAM_OPT_NO_WARN },
 		{ "authtok", 	    PAM_OPT_USE_FIRST_PASS },
@@ -147,9 +147,9 @@ modopt_t * mod_options(int argc, const char **argv) {
 		{ "try_first_pass", PAM_OPT_TRY_FIRST_PASS },
 		{ "use_mapped_pass",PAM_OPT_USE_MAPPED_PASS },
 		{ "echo_pass",      PAM_OPT_ECHO_PASS },
-		{ NULL,         0 }
+		{ "",         0 }
 	};
-	struct opttab *p;
+	const struct opttab *p;
 
 	/* Initializing values */
    modopt->connstr = NULL;
@@ -179,7 +179,7 @@ modopt_t * mod_options(int argc, const char **argv) {
 
    for(i=0;i<argc;i++) {
 
-		for (p = std_options; p->name != NULL; p++) {
+		for (p = std_options; p->name[0] != '\0'; p++) {
 			if (strcmp(argv[i], p->name) == 0) {
 				modopt->std_flags |= p->value;
 				break;
