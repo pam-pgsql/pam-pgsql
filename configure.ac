@@ -51,7 +51,7 @@ AC_FUNC_MALLOC
 AC_FUNC_REALLOC
 AC_CHECK_FUNCS([atexit bzero gethostbyname memset mkdir pow socket sqrt strcasecmp strchr strdup strerror strndup strrchr strstr strtol strtoul])
 
-AC_CONFIG_FILES([Makefile src/Makefile tests/Makefile])
+AC_CONFIG_FILES([Makefile])
 
 AC_MSG_CHECKING(for PostgreSQL headers)
 for d in /usr /usr/local /usr/local/pgsql; do
