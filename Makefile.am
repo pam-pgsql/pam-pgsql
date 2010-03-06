@@ -4,8 +4,6 @@ dist_doc_DATA = README CHANGELOG COPYRIGHT CREDITS sample.sql
 
 AM_CFLAGS = -Wall
 
-pammoddir = $(libdir)/security
-
 pammod_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@
 #pam_pgsql_ladir = @moduledir@

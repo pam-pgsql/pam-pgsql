@@ -23,13 +23,28 @@ CC_NOUNDEFINED
 dnl Checks for libraries.
 AC_SEARCH_LIBS([crypt], [c crypt])
 
-AC_CHECK_HEADERS_ONCE([security/pam_modules.h])
+AC_CHECK_HEADERS_ONCE([security/pam_modules.h security/openpam.h security/pam_misc.h])
 AC_CHECK_LIB([pam], [pam_get_user], [:])
 
 AS_IF([test "x$ac_cv_header_security_pam_modules_h" = "xno" \
        -o "x$ac_cv_lib_pam_pam_get_user" = "xno"], [
   AC_MSG_ERROR([Unable to find the PAM library or the PAM header files])
 ])
+
+AC_MSG_CHECKING([where to install the PAM module])
+AS_IF([test "x$ac_cv_header_security_openpam_h" = "xyes"],
+        dnl OpenPAM/FreeBSD installs in /usr/lib by default
+        [pammoddir='$(libdir)'],
+      [test "x$ac_cv_header_security_pam_misc_h" = "xyes"],
+        dnl Linux-PAM uses /lib/security, assume that the user has passed
+        dnl --libdir=/lib at least… this is important to get right the lib64
+        dnl ABI directory
+        [pammoddir='$(libdir)/security'],
+      [pammoddir='$(libdir)'
+       AC_MSG_WARN([Unknown PAM implementation, defaulting to something safe])
+      ])
+AC_MSG_RESULT([$pammoddir])
+AC_SUBST([pammoddir])
 
 dnl the two test programs use a default conversation, that is found on
 dnl either libpam_misc (Linux-PAM) or libpam proper (OpenPAM); so try
@@ -39,7 +54,6 @@ dnl While Linux-PAM is much more widespread, check for OpenPAM first
 dnl as it happened before that users mixed up the libpam_misc with the
 dnl OpenPAM library by mistake.
 
-AC_CHECK_HEADERS([security/openpam.h security/pam_misc.h], [break;])
 AC_CHECK_FUNC([openpam_ttyconv], [PAMCONVLIB=-lpam], [
   AC_CHECK_LIB([pam_misc], [misc_conv], [PAMCONVLIB=-lpam_misc], [
     AC_MSG_WARN([Unable to find a compatible PAM conversation, not building tests])
