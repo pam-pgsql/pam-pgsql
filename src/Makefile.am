@@ -3,9 +3,9 @@ AM_CFLAGS = -Wall
 
 INCLUDES = @PGSQL_INC@
 
-EXTRA_DIST = install-module
+pammoddir = $(libdir)/security
 
-lib_LTLIBRARIES = pam_pgsql.la
+pammod_LTLIBRARIES = pam_pgsql.la
 #pam_pgsql_la_LIBRARIES =  @PGSQL_LIB@ @DEBUG_LIB@
 #pam_pgsql_ladir = @moduledir@
 pam_pgsql_la_LIBADD = -lpam -lpq @PAM_MISC_LD@ 
@@ -23,7 +23,3 @@ pam_pgsql_la_SOURCES = \
 							  md5.h \
 							  sha1.c \
 							  sha1.h
-
-
-install:
-	@(ROOTDIR=${ROOTDIR}; ./install-module @host_os@)
