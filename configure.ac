@@ -1,16 +1,15 @@
 dnl Configure template for pam_pgsql
 
-AC_PREREQ([2.62])
+AC_PREREQ([2.63])
 AC_INIT([pam-pgsql], 0.7,[http://sourceforge.net/tracker/?func=add&group_id=62198&atid=499727], pam-pgsql)
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
+AM_INIT_AUTOMAKE([foreign subdir-objects 1.11])
+AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE
-
-AM_INIT_AUTOMAKE([foreign subdir-objects])
-m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
 
 LT_INIT([disable-static])
 
