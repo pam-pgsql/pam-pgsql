@@ -104,9 +104,9 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 	int rc;
 	PGconn *conn;
 	PGresult *res;
-	
+
 	user = NULL; rhost = NULL;
-    
+
 	if ((options = mod_options(argc, argv)) != NULL) {
 
 		/* query not specified, just succeed. */
@@ -114,7 +114,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 			//free_module_options(options);
 			return PAM_SUCCESS;
 		}
-		
+
 		if ((rc = pam_get_item(pamh, PAM_RHOST, (const void **)&rhost)) == PAM_SUCCESS) {
 			if((rc = pam_get_user(pamh, &user, NULL)) == PAM_SUCCESS) {
 				if(!(conn = db_connect(options))) {
@@ -123,7 +123,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 					DBGLOG("query: %s", options->query_acct);
 					rc = PAM_AUTH_ERR;
 					if(pg_execParam(conn, &res, options->query_acct, pam_get_service(pamh), user, NULL, rhost) == PAM_SUCCESS) {
-						if (PQntuples(res) > 0 && PQnfields(res)>=2) {
+						if (PQntuples(res) >= 2 && PQnfields(res) <= 3) {
 							char *expired_db = PQgetvalue(res, 0, 0);
 							char *newtok_db = PQgetvalue(res, 0, 1);
 							rc = PAM_SUCCESS;
@@ -132,14 +132,13 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 								if ((!strcmp(nulltok_db, "t")) && (flags & PAM_DISALLOW_NULL_AUTHTOK))
 									rc = PAM_NEW_AUTHTOK_REQD;
 							}
-							if (PQnfields(res)>=4) {
-								char *nulltok_db = PQgetvalue(res, 0, 3);
-								rc = PAM_PERM_DENIED;
-							}							
 							if (!strcmp(newtok_db, "t"))
 								rc = PAM_NEW_AUTHTOK_REQD;
 							if (!strcmp(expired_db, "t"))
 								rc = PAM_ACCT_EXPIRED;
+						} else {
+							DBLOG("query_acct should return two or three columns")
+							rc = PAM_PERM_DENIED;
 						}
 						PQclear(res);
 					}
@@ -148,7 +147,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 			}
 		}
 	}
-	
+
 	//free_module_options(options);
 	return rc;
 }
@@ -164,7 +163,7 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 	char *newpass_crypt;
 	PGconn *conn;
 	PGresult *res;
-	
+
 	user = NULL; pass = NULL; newpass = NULL; rhost = NULL; newpass_crypt = NULL;
 
 	if ((options = mod_options(argc, argv)) != NULL) {
@@ -172,7 +171,7 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 			rc = pam_get_user(pamh, &user, NULL);
 	} else
 		rc = 1;
-	
+
 	if ((rc == PAM_SUCCESS) && (flags & PAM_PRELIM_CHECK)) {
 		if (getuid() != 0) {
 			if ((rc = pam_get_pass(pamh, PAM_OLDAUTHTOK, &pass, PASSWORD_PROMPT, options->std_flags)) == PAM_SUCCESS) {
@@ -193,15 +192,15 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 				pass = (const char*) oldtok;
 				if ((rc = backend_authenticate(pam_get_service(pamh), user, pass, rhost, options)) != PAM_SUCCESS) {
 					SYSLOG("(%s) user '%s' not authenticated.", pam_get_service(pamh), user);
-				}			
+				}
 			} else {
 				SYSLOG("could not retrieve old token");
 			}
 
 		} else {
-			rc = PAM_SUCCESS;	
-		}			
-				
+			rc = PAM_SUCCESS;
+		}
+
 		if (rc == PAM_SUCCESS) {
 
 			if ((rc = pam_get_confirm_pass(pamh, &newpass, PASSWORD_PROMPT_NEW, PASSWORD_PROMPT_CONFIRM, options->std_flags)) == PAM_SUCCESS) {
@@ -222,7 +221,7 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 					free (newpass_crypt);
 				} else {
 					rc = PAM_BUF_ERR;
-				}						
+				}
 			} else {
 				SYSLOG("could not retrieve new authentication tokens");
 			}
@@ -251,8 +250,8 @@ pam_sm_open_session(pam_handle_t *pamh, int flags,
 	const char *user, *rhost;
 	int rc;
 	PGresult *res;
-	PGconn *conn;	
-	
+	PGconn *conn;
+
 	user = NULL; rhost = NULL;
 
 	if ((options = mod_options(argc, argv)) != NULL) {
@@ -286,8 +285,8 @@ pam_sm_close_session(pam_handle_t *pamh, int flags,
 	const char *user, *rhost;
 	int rc;
 	PGresult *res;
-	PGconn *conn;	
-	
+	PGconn *conn;
+
 	user = NULL; rhost = NULL;
 
 	if ((options = mod_options(argc, argv)) != NULL) {
