@@ -62,12 +62,9 @@ AC_CHECK_FUNC([openpam_ttyconv], [PAMCONVLIB=-lpam], [
 AC_SUBST([PAMCONVLIB])
 AM_CONDITIONAL([HAVE_PAM_CONV], [test "x$PAMCONVLIB" != "x"])
 
-AC_CHECK_HEADERS_ONCE([libpq-fe.h])
-AC_CHECK_LIB([pq], [PQexecParams], [:])
-
-AS_IF([test "x$ac_cv_header_libpq_fe_h" = "xno" \
-       -o "x$ac_cv_lib_pq_PQexecParams" = "xno"], [
-  AC_MSG_ERROR([Unable to find the PostgreSQL library or the PostgreSQL header files])
+AX_LIB_POSTGRESQL
+AS_IF([test "x$found_postgresql" != "xyes"], [
+  AC_MSG_ERROR([Unable to find the PostgreSQL development files])
 ])
 
 AC_CONFIG_FILES([Makefile])
