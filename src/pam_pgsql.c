@@ -137,7 +137,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 							if (!strcmp(expired_db, "t"))
 								rc = PAM_ACCT_EXPIRED;
 						} else {
-							DBLOG("query_acct should return two or three columns");
+							DBGLOG("query_acct should return two or three columns");
 							rc = PAM_PERM_DENIED;
 						}
 						PQclear(res);
