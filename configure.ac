@@ -67,6 +67,16 @@ AS_IF([test "x$found_postgresql" != "xyes"], [
   AC_MSG_ERROR([Unable to find the PostgreSQL development files])
 ])
 
+AC_MSG_CHECKING([where to look for the pam_pgsql.conf file])
+
+dnl Note that the second variable here is single quoted not to expand
+dnl ${prefix}: we want the users to be able to install in the same
+dnl prefix if they explicitly request it, but we want to override
+dnl autoconf's choice if nothing is said explicitly
+AS_IF([test "${sysconfdir}" = '${prefix}/etc'], [sysconfdir=/etc])
+
+AC_MSG_RESULT([${sysconfdir}])
+
 AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT

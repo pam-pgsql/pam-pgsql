@@ -5,7 +5,7 @@
 #ifndef __PAM_PG_OPTIONS_H_
 #define __PAM_PG_OPTIONS_H_
 
-#define PAM_PGSQL_FILECONF                 "/etc/pam_pgsql.conf"
+#define PAM_PGSQL_FILECONF                 SYSCONFDIR "/pam_pgsql.conf"
 #define PAM_PGSQL_PORT                     5432
 
 #include <sys/cdefs.h>

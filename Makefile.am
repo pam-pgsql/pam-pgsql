@@ -3,6 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 dist_doc_DATA = README CHANGELOG COPYRIGHT CREDITS sample.sql
 
 AM_CFLAGS = -Wall
+AM_CPPFLAGS = -DSYSCONFDIR='"$(sysconfdir)"'
 
 pammod_LTLIBRARIES = pam_pgsql.la
 pam_pgsql_la_CFLAGS = $(POSTGRESQL_CFLAGS)
