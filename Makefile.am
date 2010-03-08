@@ -6,7 +6,7 @@ AM_CFLAGS = -Wall
 AM_CPPFLAGS = -DSYSCONFDIR='"$(sysconfdir)"'
 
 pammod_LTLIBRARIES = pam_pgsql.la
-pam_pgsql_la_CFLAGS = $(AM_CFLAGS) $(POSTGRESQL_CFLAGS)
+pam_pgsql_la_CFLAGS = $(AM_CFLAGS) $(VISIBILITY_CFLAG) $(POSTGRESQL_CFLAGS)
 pam_pgsql_la_LIBADD = -lpam $(POSTGRESQL_LDFLAGS)
 pam_pgsql_la_LDFLAGS = -module -export-dynamic -shared -avoid-version $(LDFLAGS_NOUNDEFINED)
 pam_pgsql_la_SOURCES = \

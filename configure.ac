@@ -20,6 +20,13 @@ dnl actually make sure of that (it's not possible on all operating
 dnl systems).
 CC_NOUNDEFINED
 
+CC_ATTRIBUTE_VISIBILITY([default], [
+  CC_FLAG_VISIBILITY([
+    VISIBILITY_CFLAG="-fvisibility=hidden"
+  ])
+])
+AC_SUBST([VISIBILITY_CFLAG])
+
 dnl Checks for libraries.
 AC_SEARCH_LIBS([crypt], [c crypt])
 

@@ -8,6 +8,8 @@
  * William Grzybowski <william@agencialivre.com.br>
  */
 
+#include <config.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -27,10 +29,14 @@
 #include "pam_pgsql.h"
 #include "pam_pgsql_options.h"
 
-
+#if SUPPORT_ATTRIBUTE_VISIBILITY_DEFAULT
+# define PAM_VISIBLE PAM_EXTERN __attribute__((visibility("default")))
+#else
+# define PAM_VISIBLE PAM_EXTERN
+#endif
 
 /* public: authenticate user */
-PAM_EXTERN int
+PAM_VISIBLE int
 pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	modopt_t *options = NULL;
@@ -95,7 +101,7 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 }
 
 /* public: check if account has expired, or needs new password */
-PAM_EXTERN int
+PAM_VISIBLE int
 pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
                             const char **argv)
 {
@@ -153,7 +159,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 }
 
 /* public: change password */
-PAM_EXTERN int
+PAM_VISIBLE int
 pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	modopt_t *options = NULL;
@@ -236,13 +242,13 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 }
 
 /* public: just succeed. */
-PAM_EXTERN int
+PAM_VISIBLE int
 pam_sm_setcred(pam_handle_t *pamh, int flags, int argc, const char **argv)
 {
 	return PAM_SUCCESS;
 }
 
-PAM_EXTERN int
+PAM_VISIBLE int
 pam_sm_open_session(pam_handle_t *pamh, int flags,
             int argc, const char **argv)
 {
@@ -277,7 +283,7 @@ pam_sm_open_session(pam_handle_t *pamh, int flags,
 
 }
 
-PAM_EXTERN int
+PAM_VISIBLE int
 pam_sm_close_session(pam_handle_t *pamh, int flags,
             int argc, const char *argv[])
 {
