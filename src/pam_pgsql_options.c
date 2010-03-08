@@ -298,7 +298,7 @@ modopt_t * mod_options(int argc, const char **argv) {
 }
 
 
-void free_mod_options(modopt_t *options) {
+static void free_mod_options(modopt_t *options) {
 
 	if(options == NULL)
 		return;

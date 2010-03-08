@@ -17,6 +17,8 @@
 #include <string.h>		/* for memcpy() */
 #include "md5.h"
 
+static void MD5Transform(uint32 buf[4], uint32 const in[16]);
+
 #ifndef HIGHFIRST
 #define byteReverse(buf, len)	/* Nothing */
 #else
@@ -171,7 +173,7 @@ void MD5Final(unsigned char *digest, struct MD5Context *ctx)
  * reflect the addition of 16 longwords of new data.  MD5Update blocks
  * the data and converts bytes into longwords for this routine.
  */
-void MD5Transform(uint32 buf[4], uint32 const in[16])
+static void MD5Transform(uint32 buf[4], uint32 const in[16])
 {
     register uint32 a, b, c, d;
 

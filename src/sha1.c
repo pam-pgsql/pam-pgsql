@@ -48,8 +48,8 @@
                 ((word) >> (32-(bits))))
 
 /* Function prototypes */
-void SHA1ProcessMessageBlock(SHA1Context *);
-void SHA1PadMessage(SHA1Context *);
+static void SHA1ProcessMessageBlock(SHA1Context *);
+static void SHA1PadMessage(SHA1Context *);
 
 /*  
  *  SHA1Reset
@@ -204,7 +204,7 @@ void SHA1Input(     SHA1Context         *context,
  *         
  *
  */
-void SHA1ProcessMessageBlock(SHA1Context *context)
+static void SHA1ProcessMessageBlock(SHA1Context *context)
 {
     const unsigned K[] =            /* Constants defined in SHA-1   */      
     {
@@ -323,7 +323,7 @@ void SHA1ProcessMessageBlock(SHA1Context *context)
  *  Comments:
  *
  */
-void SHA1PadMessage(SHA1Context *context)
+static void SHA1PadMessage(SHA1Context *context)
 {
     /*
      *  Check to see if the current message block is too small to hold

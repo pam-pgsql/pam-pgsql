@@ -57,7 +57,6 @@ typedef struct modopt_s {
 } modopt_t;
 
 modopt_t * mod_options(int , const char **);
-void free_mod_options(modopt_t *options);
 
 
 int  pam_get_pass(pam_handle_t *, int, const char **, const char *, int);

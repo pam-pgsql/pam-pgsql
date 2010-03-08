@@ -28,8 +28,11 @@
 #include "md5.h"
 #include "sha1.h"
 
+static char *
+crypt_makesalt(pw_scheme scheme);
+
 /* very private: used only in get_module_options */
-char *
+static char *
 build_conninfo(modopt_t *options)
 {
     char *str;
@@ -92,7 +95,7 @@ db_connect(modopt_t *options)
 
 /* private: expand query; partially stolen from mailutils */
 
-int
+static int
 expand_query (char **command, const char** values, const char *query, const char *service, const char *user, const char *passwd, const char *rhost, const char *raddr)
 {
 	char *p, *q, *res;
@@ -336,7 +339,7 @@ password_encrypt(modopt_t *options, const char *pass, const char *salt)
 	return s;
 }
 
-char *
+static char *
 crypt_makesalt(pw_scheme scheme)
 {
 	static char result[12];
