@@ -22,7 +22,6 @@
 #define PASSWORD_PROMPT         "Password: "
 #define PASSWORD_PROMPT_NEW	    "New password: "
 #define PASSWORD_PROMPT_CONFIRM "Confirm new password: "
-#define CONF                    "/etc/pam_pgsql.conf"
 
 #include <syslog.h>
 
