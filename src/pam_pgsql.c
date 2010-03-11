@@ -107,7 +107,7 @@ pam_sm_acct_mgmt(pam_handle_t *pamh, int flags, int argc,
 {
 	modopt_t *options = NULL;
 	const char *user, *rhost;
-	int rc;
+	int rc = PAM_AUTH_ERR;
 	PGconn *conn;
 	PGresult *res;
 
