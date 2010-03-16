@@ -1,3 +1,14 @@
+pam-pgsql (0.7.1) experimental; urgency=low
+
+  * Autotools refactor
+  * Visibility ELF support
+  * Linux-PAM vs OpenPAM checks (no more OS guessing)
+  * Several bug fixes
+
+  * Special thanks to Diego Elio “Flameeyes” Pettenò, Gentoo developer
+
+ -- William Grzybowski <william@agencialivre.com.br>  Tue, 15 Mar 2010 10:10:00 -0300
+
 pam-pgsql (0.7) experimental; urgency=low
 
   * Internal code rework

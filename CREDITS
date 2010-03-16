@@ -9,3 +9,7 @@ W: Stack-friendly suggestions
 N: Jose Arthur Benetasso Villanova
 E: jose.arthur@gmail.com
 W: RPM spec file
+
+N: Diego Elio “Flameeyes” Pettenò
+E: flameeyes@gmail.com
+W: Autotools refactor and several bugfixes
