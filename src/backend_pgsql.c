@@ -23,10 +23,10 @@
 #include <unistd.h>
 #include <netdb.h>
 
+#include <gcrypt.h>
+
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"
-#include "md5.h"
-#include "sha1.h"
 
 static char *
 crypt_makesalt(pw_scheme scheme);
@@ -289,47 +289,25 @@ password_encrypt(modopt_t *options, const char *pass, const char *salt)
 			}
 		break;
 		case PW_MD5: {
-
-			MD5_CTX ctx;
-			char *buf;
-			unsigned char hash[16]; /* 16 is the md5 block size */
+			unsigned char hash[16] = { 0, }; /* 16 is the md5 block size */
 			int i;
+			s = (char *) malloc(33); /* 32 bytes + 1 byte for \0 */
 
-			bzero(&hash, 16);
+			gcry_md_hash_buffer(GCRY_MD_MD5, hash, pass, strlen(pass));
 
-			MD5Init(&ctx);
-			MD5Update(&ctx, (unsigned char const *) pass, strlen(pass));
-			MD5Final(hash, &ctx);
-
-			buf = (char *) malloc(33); /* 32 bytes + 1 byte for \0 */
-
-			for(i = 0; i < 16; i++) { 
-				sprintf(&buf[i * 2], "%.2x", hash[i]);
-			}
-			s = buf;
-
+			for(i = 0; i < sizeof(hash); i++)
+				sprintf(&s[i * 2], "%.2x", hash[i]);
 		}
 		break;
 		case PW_SHA1: {
-
-			SHA1Context ctx;
-			char *buf;
-			unsigned char hash[20]; /* 20 is the sha1 block size */
+			unsigned char hash[20] = { 0, }; /* 20 is the sha1 block size */
 			int i;
+			s = (char *) malloc(41); /* 40 bytes + 1 byte for \0 */
 
-			bzero(&hash, 20);
+			gcry_md_hash_buffer(GCRY_MD_SHA1, hash, pass, strlen(pass));
 
-			SHA1Reset(&ctx);
-			SHA1Input(&ctx, (unsigned char const *) pass, strlen(pass));
-			SHA1Result(&ctx);
-
-			buf = (char *) malloc(41); /* 40 bytes + 1 byte for \0 */
-
-			for(i = 0; i < 5; i++) { 
-				sprintf(&buf[i * 8], "%.8x", ctx.Message_Digest[i]);
-			}
-			s = buf;
-
+			for(i = 0; i < sizeof(hash); i++)
+				sprintf(&s[i * 2], "%.2x", hash[i]);
 		}
 		break;
 		case PW_CLEAR:

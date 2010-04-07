@@ -74,6 +74,10 @@ AS_IF([test "x$found_postgresql" != "xyes"], [
   AC_MSG_ERROR([Unable to find the PostgreSQL development files])
 ])
 
+AM_PATH_LIBGCRYPT(,, [
+  AC_MSG_ERROR([Unable to find libgcrypt development files])
+])
+
 AC_MSG_CHECKING([where to look for the pam_pgsql.conf file])
 
 dnl Note that the second variable here is single quoted not to expand
