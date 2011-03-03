@@ -65,7 +65,12 @@ pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, const char **argv)
 
 					} else {
 
-						SYSLOG("couldn't auth");
+                        char* rhost = NULL;
+                        if (pam_get_item(pamh, PAM_RHOST, (void *) &rhost) == PAM_SUCCESS) {
+                            SYSLOG("couldn't authenticate user %s (%s)", user, rhost);
+                        } else {
+                            SYSLOG("couldn't authenticate user %s", user);
+                        }
 
 					}
 
