@@ -13,3 +13,7 @@ W: RPM spec file
 N: Diego Elio “Flameeyes” Pettenò
 E: flameeyes@gmail.com
 W: Autotools refactor and several bugfixes
+
+N: Krzysztof Gałązka
+E: krzyg@o2.pl
+W: Report a bug against address to string conversion
