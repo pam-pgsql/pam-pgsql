@@ -1,7 +1,7 @@
 dnl Configure template for pam_pgsql
 
 AC_PREREQ([2.63])
-AC_INIT([pam-pgsql], 0.7.1,[http://sourceforge.net/tracker/?func=add&group_id=62198&atid=499727], pam-pgsql)
+AC_INIT([pam-pgsql], 0.7.2,[http://sourceforge.net/tracker/?func=add&group_id=62198&atid=499727], pam-pgsql)
 
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
