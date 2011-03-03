@@ -112,6 +112,8 @@ read_config_file(modopt_t *options)
 					options->pw_type = PW_CRYPT;
 				} else if(!strcmp(val, "crypt_md5")) {
 					options->pw_type = PW_CRYPT_MD5;
+				} else if(!strcmp(val, "md5_postgres")) {
+					options->pw_type = PW_MD5_POSTGRES;
 				}
 			} else if(!strcmp(buffer, "debug")) {
 				options->debug = 1;
@@ -256,6 +258,7 @@ modopt_t * mod_options(int argc, const char **argv) {
 			sprintf(modopt->query_auth, "select %s from %s where %s = %%u", modopt->column_pwd, modopt->table, modopt->column_user);
 
 		}
+		else SYSLOG("Can't build auth query");
 
 	}
 

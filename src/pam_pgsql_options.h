@@ -24,7 +24,8 @@ typedef enum {
     PW_MD5,
     PW_CRYPT,
     PW_CRYPT_MD5,
-    PW_SHA1
+    PW_SHA1,
+    PW_MD5_POSTGRES
 } pw_scheme;
 
 typedef struct modopt_s {

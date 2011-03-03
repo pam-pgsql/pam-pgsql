@@ -17,3 +17,7 @@ W: Autotools refactor and several bugfixes
 N: Krzysztof Gałązka
 E: krzyg@o2.pl
 W: Report a bug against address to string conversion
+
+N: Nirgal Vourgère
+E: jvourger@greenpeace.org
+W: Support to authenticate over postgresql users

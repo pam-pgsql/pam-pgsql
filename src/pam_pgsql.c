@@ -211,7 +211,7 @@ pam_sm_chauthtok(pam_handle_t *pamh, int flags, int argc, const char **argv)
 		if (rc == PAM_SUCCESS) {
 
 			if ((rc = pam_get_confirm_pass(pamh, &newpass, PASSWORD_PROMPT_NEW, PASSWORD_PROMPT_CONFIRM, options->std_flags)) == PAM_SUCCESS) {
-				if((newpass_crypt = password_encrypt(options, newpass, NULL))) {
+				if((newpass_crypt = password_encrypt(options, user, newpass, NULL))) {
 					if(!(conn = db_connect(options))) {
 						rc = PAM_AUTHINFO_UNAVAIL;
 					}

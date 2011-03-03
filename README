@@ -132,16 +132,20 @@ replaced with NULL
     debug               - this is a standard module option that will enable
                           debug output to syslog (takes no values)
     pw_type             - specifies the password encryption scheme, can be one
-                          of 'clear', 'md5', 'sha1', 'crypt', or 'crypt_md5'. the
-                          difference between 'md5' and 'crypt_md5' is that
-                          'md5' uses libmhash for hashing while 'crypt_md5'
-                          uses crypt() with a special salt to select md5
-                          hashing instead of DES. if one of 'crypt' or
-                          'crypt_md5' is specified, passwords always are
+                          of 'clear', 'md5', 'sha1', 'crypt', 'crypt_md5', or
+						  'md5_postgres'. The difference between 'md5' and
+						  'crypt_md5' is that 'md5' uses libmhash for hashing
+						  while 'crypt_md5' uses crypt() with a special salt to
+						  select md5 hashing instead of DES. if one of 'crypt'
+						  or 'crypt_md5' is specified, passwords always are
                           encrypted in the respective format. however,
                           passwords in both formats may be stored in the
                           database, just as with /etc/(passwd|shadow).
                           defaults to 'clear'.
+						  'md5_postgres' uses the postgres default internal
+						  algorithm where hash is md5||md5(password+login). This
+						  is usefull for authenticating against postgres users
+						  created by the createuser postgres command.
     config_file         - alternative location of configuration file - it should be
 			  specified as module argument.
     timeout		- if specified pam-pgsql will wait for timeout
@@ -155,3 +159,12 @@ There are also additional flags you can use:
     try_first_pass	- same as previous, but doesn't fail if previous
 			  module failed to provide us with password
     echo_pass 		- displays password while being typed
+
+Example to autenticate against postgres users
+=============================================
+database = postgres
+user = postgres
+table = pg_catalog.pg_shadow
+user_column = usename
+pwd_column = passwd
+pw_type=md5_postgres

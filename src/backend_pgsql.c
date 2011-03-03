@@ -260,7 +260,7 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 			rc = PAM_USER_UNKNOWN;
 		} else {
 			char *stored_pw = PQgetvalue(res, 0, 0);
-			if (!strcmp(stored_pw, (tmp = password_encrypt(options, passwd, stored_pw)))) rc = PAM_SUCCESS; 
+			if (!strcmp(stored_pw, (tmp = password_encrypt(options, user, passwd, stored_pw)))) rc = PAM_SUCCESS;
 			free (tmp);
 		}
 		PQclear(res);
@@ -271,7 +271,7 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 
 /* private: encrypt password using the preferred encryption scheme */
 char *
-password_encrypt(modopt_t *options, const char *pass, const char *salt)
+password_encrypt(modopt_t *options, const char *user, const char *pass, const char *salt)
 {
 	char *s = NULL;
 
@@ -293,6 +293,30 @@ password_encrypt(modopt_t *options, const char *pass, const char *salt)
 
 			for(i = 0; i < sizeof(hash); i++)
 				sprintf(&s[i * 2], "%.2x", hash[i]);
+		}
+		break;
+		case PW_MD5_POSTGRES: {
+			/* This is the md5 variant used by postgres shadow table.
+			cleartext is password||user
+			returned value is md5||md5hash(password||user)
+			*/
+			unsigned char hash[16] = { 0, }; /* 16 is the md5 block size */
+			int i;
+			s = (char *) malloc(33); /* 32 bytes + 1 byte for \0 */
+
+			size_t unencoded_length;
+			char *unencoded;
+
+			unencoded_length = strlen(pass)+strlen(user);
+			unencoded = malloc(unencoded_length+1);
+			sprintf(unencoded, "%s%s", pass, user);
+
+			gcry_md_hash_buffer(GCRY_MD_MD5, hash, unencoded, strlen(unencoded));
+			for(i = 0; i < sizeof(hash); i++)
+				sprintf(&s[i * 2], "%.2x", hash[i]);
+
+			free(unencoded);
+
 		}
 		break;
 		case PW_SHA1: {
