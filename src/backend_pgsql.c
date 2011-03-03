@@ -204,13 +204,8 @@ pg_execParam(PGconn *conn, PGresult **res,
 	
 	if(rhost != NULL && (hentry = gethostbyname(rhost)) != NULL) {
 		/* Make IP string */
-		raddr = malloc(16);
-		sprintf(raddr, "%d.%d.%d.%d",
-			hentry->h_addr_list[0][0],
-			hentry->h_addr_list[0][1],
-			hentry->h_addr_list[0][2],
-			hentry->h_addr_list[0][3]);
-		raddr[15] = 0;
+		raddr = malloc(INET_ADDRSTRLEN);
+		inet_ntop(AF_INET, hentry->h_addr_list[0], raddr, INET_ADDRSTRLEN);
 	}
 	
 	nparm = expand_query(&command, values, query, service, user, passwd, rhost, raddr);
