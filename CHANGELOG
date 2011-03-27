@@ -1,6 +1,22 @@
+pam-pgsql (0.7.3.1) experimental; urgency=low
+
+  * Update CHANGELOG
+  * Bump autoconf version
+
+ -- Jan Dittberner <jandd@debian.org>  Sun, 27 Mar 2011 08:47:48 +0200
+
+pam-pgsql (0.7.3) experimental; urgency=low
+
+  * Fix for PostgreSQL authentication by Nirgal Vourgère (Debian Bug #594721)
+  * Better logging for failed login attempt by Jan Dittberner
+
+ -- William Grzybowski <william@agencialivre.com.br>  Thu, 03 Mar 2011 14:54:19 +0000
+
 pam-pgsql (0.7.2) experimental; urgency=high
 
   * Bugfix in address to string conversion
+
+ -- William Grzybowski <william@agencialivre.com.br>  Thu, 03 Mar 2011 14:28:17 +0000
 
 pam-pgsql (0.7.1) experimental; urgency=low
 
