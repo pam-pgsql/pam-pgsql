@@ -1,6 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
 dist_doc_DATA = README CHANGELOG COPYRIGHT CREDITS sample.sql
+EXTRA_DIST = autogen.sh
 
 AM_CFLAGS = -Wall
 AM_CPPFLAGS = -DSYSCONFDIR='"$(sysconfdir)"'
