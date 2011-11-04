@@ -1,7 +1,7 @@
 Upstream Author: David D.W. Downey ("pgpkeys") <david-downey@codecastle.com>
 Upstream Source was: http://libpam-pgsql.codecastle.com
 
-Copyright (c) 2000. Leon J Breedt <ljb@debian.org>, 
+Copyright (c) 2000. Leon J Breedt <ljb@debian.org>,
 Copyright (c) 2002. David D.W. Downey ("pgpkeys") <david-downey@codecastle.com>,
 Copyright (c) 2003. Joerg Wendland <joergland@debian.org>,
 Copyright (c) 2005. Primoz Bratanic <primoz@slo-tech.com>
@@ -10,6 +10,12 @@ Copyright (c) 2009-2011 William Grzybowski <william@agencialivre.com.br>
 
 You are free to distribute this software under the terms of
 the GNU General Public License v2.0 or later.
+
 On Debian systems, the complete text of the GNU General Public
 License can be found in /usr/share/common-licenses/GPL file.
-                     
+
+As a special exception, the copyright holders of the software give you
+permission to dynamically link the compiled binary module into the
+memory space of a program indirectly through the PAM library and in such
+case consider the program not liable to the derivative works clause of
+the GPL.
