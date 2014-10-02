@@ -302,7 +302,8 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 			*/
 			unsigned char hash[16] = { 0, }; /* 16 is the md5 block size */
 			int i;
-			s = (char *) malloc(33); /* 32 bytes + 1 byte for \0 */
+			s = (char *) malloc(36); /* 3 bytes for "md5" + 32 bytes for the hash + 1 byte for \0 */
+			strncpy(s, "md5", 3);
 
 			size_t unencoded_length;
 			char *unencoded;
@@ -313,7 +314,7 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 
 			gcry_md_hash_buffer(GCRY_MD_MD5, hash, unencoded, strlen(unencoded));
 			for(i = 0; i < sizeof(hash); i++)
-				sprintf(&s[i * 2], "%.2x", hash[i]);
+				sprintf(&s[(i * 2) + 3], "%.2x", hash[i]);
 
 			free(unencoded);
 
