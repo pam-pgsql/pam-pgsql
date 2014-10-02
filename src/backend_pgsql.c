@@ -258,7 +258,7 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 	if(pg_execParam(conn, &res, options->query_auth, service, user, passwd, rhost) == PAM_SUCCESS) {
 		if(PQntuples(res) == 0) {
 			rc = PAM_USER_UNKNOWN;
-		} else {
+		} else if (!PQgetisnull(res, 0, 0)) {
 			char *stored_pw = PQgetvalue(res, 0, 0);
 			if (!strcmp(stored_pw, (tmp = password_encrypt(options, user, passwd, stored_pw)))) rc = PAM_SUCCESS;
 			free (tmp);
