@@ -1,11 +1,12 @@
 pam-pgsql (0.7.3.2) experimental; urgency=low
 
-  * add an "exception" to the GPL license to allow linking to non-GPL
-    code
-  * don't use access(2) but check error from fopen(2) when
-    reading the configuration file
+  * add an "exception" to the GPL license to allow linking to non-GPL code
+  * don't use access(2) but check error from fopen(2) when reading the
+    configuration file
+  * Fix support for pw_type md5_postgres
+  * Fix NULL password query result permits login with any password
 
- -- Jan Dittberner <jandd@debian.org>  Thu, 01 Dec 2011 20:59:36 +0100
+ -- William Grzybowski <wg@FreeBSD.org>  Thu, 02 Oct 2014 09:15:36 -0300
 
 pam-pgsql (0.7.3.1) experimental; urgency=low
 
