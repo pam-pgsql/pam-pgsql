@@ -132,8 +132,8 @@ replaced with NULL
     debug               - this is a standard module option that will enable
                           debug output to syslog (takes no values)
     pw_type             - specifies the password encryption scheme, can be one
-                          of 'clear', 'md5', 'sha1', 'crypt', 'crypt_md5', or
-						  'md5_postgres'. The difference between 'md5' and
+                          of 'clear', 'md5', 'sha1', 'crypt', 'crypt_md5',
+						  'md5_postgres' or 'function'. The difference between 'md5' and
 						  'crypt_md5' is that 'md5' uses libmhash for hashing
 						  while 'crypt_md5' uses crypt() with a special salt to
 						  select md5 hashing instead of DES. if one of 'crypt'
@@ -141,7 +141,9 @@ replaced with NULL
                           encrypted in the respective format. however,
                           passwords in both formats may be stored in the
                           database, just as with /etc/(passwd|shadow).
-                          defaults to 'clear'.
+                          'function' means to use a database function to generate
+                          the hash, and authenticate the user. In that case the 'auth_query'
+                          should return a boolean value. defaults to 'clear'.
 						  'md5_postgres' uses the postgres default internal
 						  algorithm where hash is md5||md5(password+login). This
 						  is usefull for authenticating against postgres users
