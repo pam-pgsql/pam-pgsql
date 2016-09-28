@@ -20,13 +20,13 @@
 #define PAM_OPT_USE_OLDAUTH		0x80
 
 typedef enum {
-    PW_CLEAR = 1, 
+    PW_CLEAR = 1,
     PW_MD5,
     PW_CRYPT,
     PW_CRYPT_MD5,
     PW_SHA1,
     PW_MD5_POSTGRES,
-	PW_FUNCTION
+    PW_FUNCTION
 } pw_scheme;
 
 typedef struct modopt_s {
