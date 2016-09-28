@@ -260,8 +260,12 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 			rc = PAM_USER_UNKNOWN;
 		} else if (!PQgetisnull(res, 0, 0)) {
 			char *stored_pw = PQgetvalue(res, 0, 0);
-			if (!strcmp(stored_pw, (tmp = password_encrypt(options, user, passwd, stored_pw)))) rc = PAM_SUCCESS;
-			free (tmp);
+			if (options->pw_type == PW_FUNCTION) {
+				if (!strcmp(stored_pw, "t")) { rc = PAM_SUCCESS; }
+			} else {
+				if (!strcmp(stored_pw, (tmp = password_encrypt(options, user, passwd, stored_pw)))) rc = PAM_SUCCESS;
+				free (tmp);
+			}
 		}
 		PQclear(res);
 	}
@@ -332,6 +336,7 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 		}
 		break;
 		case PW_CLEAR:
+		case PW_FUNCTION:
 		default:
 			s = strdup(pass);
 	}
