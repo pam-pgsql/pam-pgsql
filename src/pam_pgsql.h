@@ -19,9 +19,9 @@
 #define PAM_SM_PASSWORD
 #include <security/pam_modules.h>
 
-#define PASSWORD_PROMPT         "DATABASE password: "
-#define PASSWORD_PROMPT_NEW	    "New DATABASE password: "
-#define PASSWORD_PROMPT_CONFIRM "Confirm new DATABASE password: "
+#define PASSWORD_PROMPT         "Password: "
+#define PASSWORD_PROMPT_NEW	    "New password: "
+#define PASSWORD_PROMPT_CONFIRM "Confirm new password: "
 
 #include <syslog.h>
 
