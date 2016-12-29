@@ -282,6 +282,7 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 	switch(options->pw_type) {
 		case PW_CRYPT:
 		case PW_CRYPT_MD5:
+		case PW_CRYPT_SHA512: 
 			if (salt==NULL) {
 				s = strdup(crypt(pass, crypt_makesalt(options->pw_type)));
 			} else {
@@ -353,6 +354,10 @@ crypt_makesalt(pw_scheme scheme)
 	if(scheme==PW_CRYPT){
 		len=2;
 		pos=0;
+	} else if(scheme==PW_CRYPT_SHA512) { /* PW_CRYPT_SHA512 */
+		strcpy (result, "$6$");
+		len = 11;
+		pos = 3;
 	} else { /* PW_CRYPT_MD5 */
 		strcpy(result,"$1$");
 		len=11;

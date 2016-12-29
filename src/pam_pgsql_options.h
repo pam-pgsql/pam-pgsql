@@ -24,6 +24,7 @@ typedef enum {
     PW_MD5,
     PW_CRYPT,
     PW_CRYPT_MD5,
+    PW_CRYPT_SHA512,
     PW_SHA1,
     PW_MD5_POSTGRES,
     PW_FUNCTION
