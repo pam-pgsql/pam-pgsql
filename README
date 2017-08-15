@@ -33,10 +33,15 @@ Or if you're using a git version, run this command before them all:
 
     $ ./autogen.sh
 
-Compilation has been tested on Debian GNU/Linux, ArchLinux and FreeBSD 7.2
+Compilation has been tested on Debian GNU/Linux, ArchLinux, FreeBSD 7.2 and CentOS 7.
 
 On Debian, you will need the libpam0g-dev and postgresql-dev packages to compile.
 On FreeBSD you will have to install the postgresql/postgresql8*-client port.
+On CentOS you will have to install `libgcrypt`, `postgresql-devel` and `libgcrypt-devel` installed, as well as `gcc-c++`. Then autoreconf with:
+
+    $ autoreconf --install
+
+once that done, you can now `./configure`, `make` and `make install`.
 
 See authenticate.c and chpass.c for an example application that authenticates and change password using this module.
 
