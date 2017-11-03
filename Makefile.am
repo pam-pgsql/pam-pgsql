@@ -9,7 +9,7 @@ AM_CPPFLAGS = -DSYSCONFDIR='"$(sysconfdir)"'
 pammod_LTLIBRARIES = pam_pgsql.la
 pam_pgsql_la_CFLAGS = $(AM_CFLAGS) $(VISIBILITY_CFLAG) $(POSTGRESQL_CFLAGS) \
 	$(LIBGCRYPT_CFLAGS)
-pam_pgsql_la_LIBADD = -lpam $(POSTGRESQL_LDFLAGS) $(LIBGCRYPT_LIBS)
+pam_pgsql_la_LIBADD = -lpam -lb64 $(POSTGRESQL_LDFLAGS) $(LIBGCRYPT_LIBS)
 pam_pgsql_la_LDFLAGS = -module -export-dynamic -shared -avoid-version $(LDFLAGS_NOUNDEFINED)
 pam_pgsql_la_SOURCES = \
 			src/pam_pgsql.c \

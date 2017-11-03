@@ -115,7 +115,11 @@ read_config_file(modopt_t *options) {
                 options->pw_type = PW_MD5_POSTGRES;
             } else if(!strcmp(val, "function")) {
                 options->pw_type = PW_FUNCTION;
+            } else if(!strcmp(val, "salted_hash")) {
+                options->pw_type = PW_SALTEDHASH;
             }
+        } else if(!strcmp(buffer, "salt_size")) {
+            options->salt_size = atoi(val);
         } else if(!strcmp(buffer, "debug")) {
             options->debug = 1;
         }
@@ -174,6 +178,7 @@ modopt_t * mod_options(int argc, const char **argv) {
     modopt->query_session_close = NULL;
     modopt->port = strdup("5432");
     modopt->debug = 0;
+    modopt->salt_size = 4;
     modopt->std_flags = 0;
 
     for(i=0; i<argc; i++) {

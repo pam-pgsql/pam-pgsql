@@ -12,7 +12,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#define __USE_MISC
 #include <string.h>
+#undef __USE_MISC
 #include <strings.h>
 #include <syslog.h>
 #include <ctype.h>
@@ -25,12 +27,117 @@
 #include <arpa/inet.h>
 
 #include <gcrypt.h>
+#include <b64/cdecode.h>
 
 #include "backend_pgsql.h"
 #include "pam_pgsql.h"
 
 static char *
 crypt_makesalt(pw_scheme scheme);
+
+typedef struct {
+    char *signature;
+    int   algorithm;
+    int   buffer_size;
+} algorithm_descriptor;
+
+static const algorithm_descriptor
+algo_map[] = {
+   { "SSHA-512", GCRY_MD_SHA512, 64 },
+   { "SSHA512",  GCRY_MD_SHA512, 64 },
+   { "SSHA-384", GCRY_MD_SHA384, 48 },
+   { "SSHA384",  GCRY_MD_SHA384, 48 },
+   { "SSHA-256", GCRY_MD_SHA256, 32 },
+   { "SSHA256",  GCRY_MD_SHA256, 32 },
+   { "SSHA-224", GCRY_MD_SHA224, 28 },
+   { "SSHA224",  GCRY_MD_SHA224, 28 },
+   { "SMD5",     GCRY_MD_MD5,    16 },
+   { "SSHA",     GCRY_MD_SHA1,   20 }
+};
+
+static const int
+algo_map_length = 10;
+
+static const algorithm_descriptor *
+get_algorithm(char *signature) {
+    for (int i = 0; i < algo_map_length ; i++) {
+        if (!strcmp(signature,algo_map[i].signature)) {
+            return &algo_map[i];
+        }
+    }
+	SYSLOG("Unsupported algorithm: '%s'", signature);
+    return NULL;
+}
+
+static char *
+remove_hash(char **payload) {
+    char *hash = strsep(payload,"}");
+    strsep(&hash,"{");
+    return(hash);
+}
+
+static char *
+b64dec_payload(const char *encoded_payload, int *count) {
+    base64_decodestate  s;
+    unsigned int        payload_size;
+    char               *payload;
+
+    payload_size = strlen( encoded_payload );
+    payload      = (char *) malloc( payload_size );
+
+    /* Use libb64 to decode */
+    base64_init_decodestate(&s);
+    *count = base64_decode_block( encoded_payload,
+                                  payload_size,
+                                  payload,
+                                  &s);
+
+    return payload;
+}
+
+static int
+match(const char *salted, const char *guess, int salt_length) {
+
+    /* Remove hash id */
+    char *hash_id = remove_hash( (char **) &salted );
+    /* salted points to '}'+1 */
+
+    /* Payload Base64 decode */
+    int   payload_length;
+    char *payload = b64dec_payload( salted, &payload_length );
+    /* Payload is HASH(passwd || salt) || salt */
+
+    /* Split using salt length */
+    char *salt = payload + payload_length - salt_length;
+    /* (payload,payload_length) describen HASH(passwd || salt)
+     * (salt,salt_length) descibe salt */
+
+    /* Catenate guess with salt */
+    int  guess_length    = strlen( guess );
+    int  catenate_length = guess_length + salt_length;
+    char *catenate       = malloc( catenate_length );
+
+    strcpy( catenate, guess );
+
+    for (int i = 0; i < salt_length ; i++)
+        *(catenate + guess_length + i) = salt[i];
+
+    /* Hash catenation */
+    const algorithm_descriptor *p = get_algorithm( hash_id );
+
+    /* Compare if possible */
+    if (p != NULL) {
+        char *digest = malloc( p->buffer_size );
+        gcry_md_hash_buffer( p->algorithm,
+                             digest,
+                             catenate,
+                             catenate_length );
+        return !memcmp( digest, payload, p->buffer_size );
+    } 
+    return 0;
+
+}
+
 
 /* very private: used only in get_module_options */
 static char *
@@ -336,6 +443,12 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 				sprintf(&s[i * 2], "%.2x", hash[i]);
 		}
 		break;
+        case PW_SALTEDHASH: {
+            if (match( salt, pass, options->salt_size )) {
+               s = strdup(pass);
+            }
+        }
+        break;
 		case PW_CLEAR:
 		case PW_FUNCTION:
 		default:
@@ -369,3 +482,4 @@ crypt_makesalt(pw_scheme scheme)
 	result[len]=0;
 	return result;
 }
+
