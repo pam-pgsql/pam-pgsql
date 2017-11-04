@@ -109,8 +109,8 @@ match(const char *salted, const char *guess, int salt_length) {
 
     /* Split using salt length */
     char *salt = payload + payload_length - salt_length;
-    /* (payload,payload_length) describen HASH(passwd || salt)
-     * (salt,salt_length) descibe salt */
+    /* (payload,payload_length) describe HASH(passwd || salt)
+     * (salt,salt_length) describe salt */
 
     /* Catenate guess with salt */
     int  guess_length    = strlen( guess );
@@ -370,8 +370,12 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 			if (options->pw_type == PW_FUNCTION) {
 				if (!strcmp(stored_pw, "t")) { rc = PAM_SUCCESS; }
 			} else {
-				if (!strcmp(stored_pw, (tmp = password_encrypt(options, user, passwd, stored_pw)))) rc = PAM_SUCCESS;
-				free (tmp);
+				tmp = password_encrypt(options, user, passwd, stored_pw);
+                if (tmp != NULL) {
+                    if (!strcmp(stored_pw, tmp))
+                        rc = PAM_SUCCESS;
+  				    free (tmp);
+                }
 			}
 		}
 		PQclear(res);
