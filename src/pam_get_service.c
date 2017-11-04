@@ -7,7 +7,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <security/pam_client.h>
 #include <security/pam_modules.h>
 
 const char *

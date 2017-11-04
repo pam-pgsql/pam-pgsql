@@ -65,7 +65,7 @@ get_algorithm(char *signature) {
             return &algo_map[i];
         }
     }
-	SYSLOG("Unsupported algorithm: '%s'", signature);
+	SYSLOG("Unsupported salted-hash algorithm: '%s'", signature);
     return NULL;
 }
 
@@ -127,7 +127,7 @@ match(const char *salted, const char *guess, int salt_length) {
 
     /* Compare if possible */
     if (p != NULL) {
-        char *digest = malloc( p->buffer_size );
+        char *digest = calloc( 1, p->buffer_size );
         gcry_md_hash_buffer( p->algorithm,
                              digest,
                              catenate,
@@ -449,7 +449,7 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 		break;
         case PW_SALTEDHASH: {
             if (match( salt, pass, options->salt_size )) {
-               s = strdup(pass);
+               s = strdup(salt);
             }
         }
         break;
