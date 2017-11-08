@@ -6,6 +6,8 @@
  *
  * David D.W. Downey ("pgpkeys") <david-downey@codecastle.com> et al. (see COPYRIGHT)
  * William Grzybowski <william@agencialivre.com.br>
+ * Ernesto Hernández-Novich <emhn@uniregistry.link>
+ * Luis E. Muñoz <lem@uniregistry.link>
  */
 
 #define _XOPEN_SOURCE 500
@@ -35,6 +37,10 @@
 static char *
 crypt_makesalt(pw_scheme scheme);
 
+/** Salted-hash support **/
+
+/* Supported salted-hash algorithms */
+
 typedef struct {
     char *signature;
     int   algorithm;
@@ -58,6 +64,7 @@ algo_map[] = {
 static const int
 algo_map_length = 10;
 
+/* Return pointer to descriptor given algorithm name */
 static const algorithm_descriptor *
 get_algorithm(char *signature) {
     for (int i = 0; i < algo_map_length ; i++) {
@@ -69,12 +76,16 @@ get_algorithm(char *signature) {
     return NULL;
 }
 
+/* Extract algorithm name from payload */
+
 static char *
 remove_hash(char **payload) {
     char *hash = strsep(payload,"}");
     strsep(&hash,"{");
     return(hash);
 }
+
+/* Base64-decode payload into byte buffer */
 
 static char *
 b64dec_payload(const char *encoded_payload, int *count) {
@@ -94,6 +105,9 @@ b64dec_payload(const char *encoded_payload, int *count) {
 
     return payload;
 }
+
+/* Return true if `guess` matches salted-hash password `salted`,
+ * given a particular `salt_length` */
 
 static int
 match(const char *salted, const char *guess, int salt_length) {
@@ -118,14 +132,13 @@ match(const char *salted, const char *guess, int salt_length) {
     char *catenate       = malloc( catenate_length );
 
     strcpy( catenate, guess );
-
     for (int i = 0; i < salt_length ; i++)
         *(catenate + guess_length + i) = salt[i];
 
     /* Hash catenation */
     const algorithm_descriptor *p = get_algorithm( hash_id );
 
-    /* Compare if possible */
+    /* Compare only for supported algorithms */
     if (p != NULL) {
         char *digest = calloc( 1, p->buffer_size );
         gcry_md_hash_buffer( p->algorithm,
@@ -135,7 +148,6 @@ match(const char *salted, const char *guess, int salt_length) {
         return !memcmp( digest, payload, p->buffer_size );
     } 
     return 0;
-
 }
 
 

@@ -25,3 +25,7 @@ W: Support to authenticate over postgresql users
 N: Jan Dittberner 
 E: jandd@debian.org
 W: Better logging for failed login attempt
+
+N: Ernesto Hernández-Novich / Luis E. Muñoz
+E: emhn@uniregistry.link / lem@uniregistry.link
+W: Salted-hash support. Improve documentation.

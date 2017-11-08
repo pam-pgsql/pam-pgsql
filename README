@@ -1,177 +1,270 @@
-pam_pgsql 0.7
-=============
+# pam_pgsql 0.7
 
-Introduction
-============
+# Introduction
 
-This module provides support to authenticate against PostgreSQL
-tables for PAM-enabled appliations.
+This module allows PAM-enabled applications to use authentication
+information stored in PostgreSQL tables.
 
-This module is based in part on the FreeBSD pam_unix module, and
-the Debian pam_mysql module, but was written from scratch using
+This module is based in part on the FreeBSD `pam_unix` module, and
+Debian's `pam_mysql` module, but was written from scratch using
 the two as a reference.
 
-There is another pam_pgsql module, but the sources appear to have
+There is another `pam_pgsql` module, but the sources appear to have
 vanished, hence this module.
 
-Changes since last release
-==========================
+# Changes since last release
 
-See the file CHANGELOG.
+See the file `CHANGELOG`.
 
-Compilation & Installation
-==========================
+# Compilation & Installation
 
-pam_pgsql is now autoconf'ed, thus, compiling should be a matter
-of:
+`pam_pgsql` uses `autoconf`, thus, compiling should be a matter of:
 
     $ ./configure
     $ make
     $ make install
 
-Or if you're using a git version, run this command before them all:
+Or if you're using a Git version, run this command before them all:
 
     $ ./autogen.sh
 
 Compilation has been tested on Debian GNU/Linux, ArchLinux, FreeBSD 7.2 and CentOS 7.
 
-On Debian, you will need the libpam0g-dev and postgresql-dev packages to compile.
-On FreeBSD you will have to install the postgresql/postgresql8*-client port.
-On CentOS you will have to install `libgcrypt`, `postgresql-devel` and `libgcrypt-devel` installed, as well as `gcc-c++`. Then autoreconf with:
+## Debian GNU/Linux specifics
+
+Debian provides a `libpam-pgsql` package, but if you decide to build your own
+from sources, you will need packages `libb64-dev`, `libgcrypt-dev`, `libpam0g-dev`
+and `libpq-dev` packages, as well as `gcc`, `autoconf`, `automake` and `libtool`
+to compile.
+
+## FreeBSD
+
+On FreeBSD you will have to install the `postgresql/postgresql8*-client` port.
+
+## CentOS
+
+On CentOS you will have to install `libgcrypt`, `postgresql-devel` and 
+`libgcrypt-devel` installed, as well as `gcc-c++`. Then `autoreconf` with:
 
     $ autoreconf --install
 
-once that done, you can now `./configure`, `make` and `make install`.
+once that's done, you can now `./configure`, `make` and `make install`.
 
-See authenticate.c and chpass.c for an example application that authenticates and change password using this module.
+# Programming Examples
+
+See `authenticate.c` and `chpass.c` for an example application that authenticates
+and changes passwords using this module.
 
 This version only works with PostgreSQL versions 7.4 or newer.
 
-Configuration
-=============
+# Configuration
 
-For the service you wish the module to be used, you need
-to edit the /etc/pam.d/<service> file or /etc/pam.conf, and 
-add the relevant lines.
+## PAM Configuration
+
+Edit the `/etc/pam.d/<service>` for the service that will use PostgreSQL
+to authenticate, or `/etc/pam.conf`, adding the relevant lines.
 
 For example:
 
-auth        required    pam_pgsql.so 
-account     required    pam_pgsql.so
-password    required    pam_pgsql.so
-session     required    pam_pgsql.so
+    auth        required    pam_pgsql.so 
+    account     required    pam_pgsql.so
+    password    required    pam_pgsql.so
+    session     required    pam_pgsql.so
 
 Or:
 
-password    required    pam_cracklib.so
-password    required    pam_pgsql.so authtok
+    password    required    pam_cracklib.so
+    password    required    pam_pgsql.so authtok
 
-Configure the database, and table the module should use with
-the configuration file /etc/pam_pgsql.conf. An example of
-this file:
+The following module-specific PAM directives can be used
 
-database = sysdb
-user = ljb
-table = account
-user_column = user_name
-pwd_column = user_password
-expired_column = acc_expired
-newtok_column = acc_new_pwreq
-debug = 1
+*   `debug`: Enable debugging output to syslog.
+
+*   `config_file`: Alternative location for configuration file.
+
+*   `timeout`: Optional wait, specified in seconds, before the
+    module gives up while trying to connect to the database.
+
+The following standard PAM directives can be used to adapt to
+any stack of authentication modules.
+
+*   `echo_pass`: Display password while its being typed.
+
+*   `authtok`: Make `pam_pgsql` provide the authentication
+    token down the PAM stack so the next module can use it
+    to continue authentication.
+
+*   `use_first_pass`: Require `authtok` from previous entry in
+    PAM stack in order to use it as password. This is useful
+    when `pam_pgsql` is being used after a PAM module that
+    requests or manipulates the authentication token, e.g.
+
+        	password   required  pam_cracklib.so 
+        	password   required  pam_pgsql.so  use_first_pass
+
+*   `try_first_pass`: Same intent as `authtok` and `use_first_pass`,
+    but doesn't fail if previous module doesn't provide a password.
+
+## Simple database configuration
+
+If you have a **single** table holding user names, passwords,
+account expiration, and password renewal information, 
+configuration only requires database connection credentials,
+table and column names.
+
+For instance, if database `sysdb` holds a table `accounts` with
+columns `user_name`, `user_password`, `expired` and
+`force_change`, then configuration file `/etc/pam_pgsql.conf`
+should look like
+
+        database = sysdb
+        user = ljb
+        password = secret
+        table = accounts
+        user_column = user_name
+        pwd_column = user_password
+        expired_column = expired
+        newtok_column = force_change
+        debug = 1
+
+where `user` and `password` are the credentials needed in order
+to connect to the database. Columns `expired_column` and `force_change`
+are presumed boolean.
 
 Note that for backwards compatibility with earlier versions, options specified
 in the configuration file can be supplied as module arguments as well. Module
 arguments will override the configuration file.
 
-From version 0.6 you can also use new style configuration (overrides legacy
-values).
+Simple configuration can use the following directives:
 
-connect = dbname=sysdb user=ljb password=sth connect_timeout=15
-auth_query = select user_password from account where user_name = %u
-acct_query = select (acc_expired = 'y' OR acc_expired = '1'), (acc_new_pwreq = 'y' OR acc_new_pwreq = '1'), (user_password IS NULL OR user_password = '') from account where user_name = %u
-pwd_query = update account set user_password = %p where user_name = %u
+*   `database`: Name of database to connect to.
+
+*   `host`: Host or IP address where database server is running on. If
+    defined empty, connection will be attempted via local UNIX sockets.
+
+*   `port`:	TCP port where database server is running on. If defined
+    empty, connection will be attempted via local UNIX sockets.
+
+*   `user`: Username used to connect to database.
+
+*   `password`: Password for `user` to connect to database.
+
+*   `table`: Table holding authentication information.
+
+*   `user_column`: Column in table `table` holding the authentication
+    user names.
+
+*   `pwd_column`: Column in table `table` holding the authentication
+    passwords.
+
+*   `expired_column`: Column in table `table` indicating the account
+    has expired. It could contain numbers (`1`), a single character (`y`),
+    or be a boolean.
+
+*   `newtok_column`: Column in table `table` indicating the account
+    must change its password. It could contain numbers (`1`), a single
+    character (`y`), or be a boolean.
+ 
+## Flexible database configuration
+
+From version 0.6 onwards there's a new flexible configuration style
+allowing multiple tables and queries to be used for extracting authentication
+information from the database. Note that using this new configuration style
+overrides legacy values, so they can't be mixed.
+
+The simple configuration above could translate to
+
+    connect = dbname=sysdb user=ljb password=secret connect_timeout=15
+    auth_query = select user_password from accounts where user_name = %u
+    acct_query = select expired, force_change, (user_password IS NULL OR user_password = '') from accounts where user_name = %u
+    pwd_query = update accounts set user_password = %p where user_name = %u
 
 
-Configuration Options
-=====================
+Flexible configuration can use the following directives:
 
-    connect 		- the database connection string (see http://www.postgresql.org/docs/7.4/interactive/libpq.html#LIBPQ-CONNECT)
-			  overrides other connection specific options
-    auth_query		- authentication query (should return one column -- password)
-			  overrides other authentication specific options
-    auth_succ_query	- query to be executed after successful authentication
-    auth_fail_query	- query to be executed after failed authentication
-    session_open_query  - query to be executed on session start
-    session_close_query - query to be executed on session end
+*   `connect`: A database connection string as used by libpq. See 
+    <https://www.postgresql.org/docs/current/static/libpq.html>
+    for details. This directive overrides other connection specific options.
 
-    acct_query		- account options query (should return 3 or 4 boolean columns -- expired, new password required and password is null, return PAM_PERM_DENIED (y/n))
-			  overrides other account specific options
-    pwd_query		- query to be executed for password changing 
-			  overrides other settings related to changing password
+*   `pw_type`: Specifies the password encryption scheme that is stored in
+    the database table. Can be one of:
 
-You can use %u as username, %p as (new) password, %h for hostname of client
-as specified by PAM subsystem, %i for IP got by gethostbyname(%h) and %s as
-pa service name in any query. Please don't forget to specify pw_type as %p
-is replaced by password of pw_type form.
+       *   `clear`: Password is stored in clear text.
+       
+       *   `md5`: Password is stored as MD5 as hashed by `libmhash`.
 
-Caution: 
-If %h is unavailable but used, system substitutes it in query with
-NULL, but does not fail (you can fail it manually by using "%s is not null"
-somewhere in your query). If %i is used and gethostbyname() fails than:
-	(i) when rhost is empty or doesn't contain any periods ("."), %i is
-replaced with NULL
-	(ii) in any other case pam_pgsql return PAM_AUTH_ERR. 
+       *   `crypt_md5`: Password is stored as MD5 as hashed by `crypt()`,
+           using a special salt.
 
-    database            - the database which should be connected to
-    table               - the table containing the authentication data
-    host		- the host database server is running on (leave empty for socket)
-    port		- the port database server is running on (leave empty for socket)
-    user                - the username used when connecting to PostgreSQL
-    password            - the password for the user specified
-    user_column         - the column containing usernames
-    pwd_column          - the column containing the passwords
-    expired_column      - this column should contain '1' or 'y' if the account
-                          has expired, bool type is OK
-    newtok_column       - this column should contain '1' or 'y' if the user
-                          needs to change their password, bool type is OK
-    debug               - this is a standard module option that will enable
-                          debug output to syslog (takes no values)
-    pw_type             - specifies the password encryption scheme, can be one
-                          of 'clear', 'md5', 'sha1', 'crypt', 'crypt_md5',
-						  'md5_postgres' or 'function'. The difference between 'md5' and
-						  'crypt_md5' is that 'md5' uses libmhash for hashing
-						  while 'crypt_md5' uses crypt() with a special salt to
-						  select md5 hashing instead of DES. if one of 'crypt'
-						  or 'crypt_md5' is specified, passwords always are
-                          encrypted in the respective format. however,
-                          passwords in both formats may be stored in the
-                          database, just as with /etc/(passwd|shadow).
-                          'function' means to use a database function to generate
-                          the hash, and authenticate the user. In that case the 'auth_query'
-                          should return a boolean value. defaults to 'clear'.
-						  'md5_postgres' uses the postgres default internal
-						  algorithm where hash is md5||md5(password+login). This
-						  is usefull for authenticating against postgres users
-						  created by the createuser postgres command.
-    config_file         - alternative location of configuration file - it should be
-			  specified as module argument.
-    timeout		- if specified pam-pgsql will wait for timeout
-			  seconds before giving up on db connection
+       *   `md5_postgres`: Password is stored using PostgreSQL's internal
+           algorithm where hash is MD5 || MD5(password + login). This
+           is useful to authenticate against PostgreSQL own users
+           (those created via `createuser` and stored in table
+           `pg_catalog.pg_shadow`).
 
-There are also additional flags you can use:
-    authtok		- see "use_first_pass"
-    use_first_pass	- require authtok from previous entry in PAM stack
-			  (useful for "password   required  pam_pgsql.so authtok")
-			  after "password required pam_cracklib.so ..."
-    try_first_pass	- same as previous, but doesn't fail if previous
-			  module failed to provide us with password
-    echo_pass 		- displays password while being typed
+       *   `function`: Use a database function to generate the hash.
+           For this to work, `auth_query` should be written such that
+           it uses the provided password and return a single boolean
+           value stating whether or not user has been authenticated.
 
-Example to autenticate against postgres users
-=============================================
-database = postgres
-user = postgres
-table = pg_catalog.pg_shadow
-user_column = usename
-pwd_column = passwd
-pw_type=md5_postgres
+       *   `salted_hash`: Use the salted-hash mechanism as provided
+           by Perl's `Crypt::SaltedHash` module. Given any of the
+           supported hash algorithms and a salt, the password should
+           be hashed as HASH(password+salt) || SALT, Base64 encoded,
+           and prefixed with the hash name in front, e.g.
+
+                   {SSHA}f767n4vI5smFY1pUNnM0GYkd0mgYOCLj
+
+           would be stored for password `secret` using SHA-1 as
+           hashing algorithm. The module supports SSHA, SMD5,
+           SSHA224, SSHA256, SSHA384 and SSHA512.
+
+       *   `salt_size`: Specify a custom salt size to be used with
+           the `salted_hash` method. The default value is 4, which
+           is the standard salt size for `Crypt::SaltedHash` as
+           well as most salt-hash libraries.
+
+*   `auth_query`: A SQL query used for authentication. This query should
+    return **a single row with a single column** holding the current password
+    for the given user, as stored in the database tables.
+			  
+*   `auth_succ_query`: An optional SQL query to be executed after *successful*
+    authentication.
+
+*   `auth_fail_query`: An optional SQL query to be executed after *failed*
+    authentication.
+
+*   `session_open_query`: An optional SQL query to be executed on session start.
+
+*   `session_close_query`: An optional SQL query to be executed on session close.
+
+*   `acct_query`: A SQL query to obtain account options for a given username.
+    The query should return 3 or 4 boolean columns: account expired, new password required,
+    password is null, and possibly a `PAM_PERM_DENIED` column.
+
+*   `pwd_query`: A SQL query to perform password changing for a given username.
+
+The queries should be written as a single long line. Queries can use special
+variables that will be substituted with information coming from the PAM authentication
+process:
+
+*    `%u` -- username.
+
+*    `%p` -- the password, either the one to use for authentication, or
+     the new one while changing it.
+
+*    `%h` -- client hostname as specified by PAM subsystem. If `%h` is
+     unavailable but used, system substitutes `NULL` in query, but
+     **does not** fail. You can fail it manually by using
+     `%s IS NOT NULL` somewhere in the query.
+
+*    `%i` -- client IP as per `gethostbyname(%h)`. If `gethostbyname`
+     fails then if `rhost` is empty or doesn't contain any periods ("."),
+     `%i` is replaced with `NULL`. Otherwise `pam_pgsql` will
+     return `PAM_AUTH_ERR`.
+
+--
+
+Ernesto Hernández-Novich `<emhn@uniregistry.link>` 2017-11-07
+
+Luis Muñoz `<lem@uniregistry.link>` 2017-11-07
