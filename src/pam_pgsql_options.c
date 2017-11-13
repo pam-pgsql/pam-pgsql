@@ -302,14 +302,3 @@ modopt_t * mod_options(int argc, const char **argv) {
     return modopt;
 
 }
-
-
-static void free_mod_options(modopt_t *options) {
-
-    if(options == NULL)
-        return;
-
-
-    return;
-
-}

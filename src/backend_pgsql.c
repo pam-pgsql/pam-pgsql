@@ -14,9 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
-#define __USE_MISC
 #include <string.h>
-#undef __USE_MISC
 #include <strings.h>
 #include <syslog.h>
 #include <ctype.h>

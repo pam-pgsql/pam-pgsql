@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 dist_doc_DATA = README CHANGELOG COPYRIGHT CREDITS sample.sql
 EXTRA_DIST = autogen.sh
 
-AM_CFLAGS = -Wall
+AM_CFLAGS = -Wall -std=c99 -D_DEFAULT_SOURCE=1
 AM_CPPFLAGS = -DSYSCONFDIR='"$(sysconfdir)"'
 
 pammod_LTLIBRARIES = pam_pgsql.la
