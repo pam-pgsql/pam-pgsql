@@ -24,6 +24,7 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
+#include <crypt.h>
 #include <gcrypt.h>
 
 #include "backend_pgsql.h"
@@ -46,32 +47,32 @@ build_conninfo(modopt_t *options)
 
     /* SAFE */
 	 if(options->db) {
-   	 strncat(str, "dbname=", strlen("dbname="));
-   	 strncat(str, options->db, strlen(options->db));
+		strcat(str, "dbname=");
+		strncat(str, options->db, strlen(options->db));
 	 }
 
 	if(options->host) {
-		strncat(str, " host=", strlen(" host="));
+		strcat(str, " host=");
 		strncat(str, options->host, strlen(options->host));
 	}
 	if(options->port) {
-		strncat(str, " port=", strlen(" port="));
+		strcat(str, " port=");
 		strncat(str, options->port, strlen(options->port));
 	}    
 	if(options->timeout) {
-		strncat(str, " connect_timeout=", strlen(" connect_timeout="));
+		strcat(str, " connect_timeout=");
 		strncat(str, options->timeout, strlen(options->timeout));
 	}
 	if(options->user) {
-		strncat(str, " user=", strlen(" user="));
+		strcat(str, " user=");
 		strncat(str, options->user, strlen(options->user));
 	}
 	if(options->passwd) {
-		strncat(str, " password=", strlen(" password="));
+		strcat(str, " password=");
 		strncat(str, options->passwd, strlen(options->passwd));
 	}
 	if(options->sslmode) {
-		strncat(str, " sslmode=", strlen(" sslmode="));
+		strcat(str, " sslmode=");
 		strncat(str, options->sslmode, strlen(options->sslmode));
 	}
 
@@ -308,7 +309,7 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 			unsigned char hash[16] = { 0, }; /* 16 is the md5 block size */
 			int i;
 			s = (char *) malloc(36); /* 3 bytes for "md5" + 32 bytes for the hash + 1 byte for \0 */
-			strncpy(s, "md5", 3);
+			memcpy(s, "md5", 3);
 
 			size_t unencoded_length;
 			char *unencoded;
