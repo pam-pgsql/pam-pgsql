@@ -33,6 +33,10 @@ AC_SEARCH_LIBS([crypt], [c crypt])
 AC_CHECK_HEADERS_ONCE([security/pam_modules.h security/openpam.h security/pam_misc.h])
 AC_CHECK_LIB([pam], [pam_get_user], [:])
 
+AC_CHECK_HEADERS_ONCE([b64/cdecode.h])
+AC_CHECK_LIB([b64], [base64_init_decodestate])
+AC_CHECK_LIB([b64], [base64_decode_block])
+
 AS_IF([test "x$ac_cv_header_security_pam_modules_h" = "xno" \
        -o "x$ac_cv_lib_pam_pam_get_user" = "xno"], [
   AC_MSG_ERROR([Unable to find the PAM library or the PAM header files])

@@ -27,7 +27,8 @@ typedef enum {
     PW_CRYPT_SHA512,
     PW_SHA1,
     PW_MD5_POSTGRES,
-    PW_FUNCTION
+    PW_FUNCTION,
+    PW_SALTEDHASH
 } pw_scheme;
 
 typedef struct modopt_s {
@@ -56,6 +57,7 @@ typedef struct modopt_s {
 	int pw_type;
    int debug;
 	int std_flags;
+    int salt_size;
 
 } modopt_t;
 
