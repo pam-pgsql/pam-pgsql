@@ -248,24 +248,34 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 {
 	PGresult *res;
 	PGconn *conn;
-	int rc;
+	int rc, row_count;
 	char *tmp;
 
-	if(!(conn = db_connect(options)))
+	if (!(conn = db_connect(options)))
 		return PAM_AUTH_ERR;
 
 	DBGLOG("query: %s", options->query_auth);
 	rc = PAM_AUTH_ERR;	
-	if(pg_execParam(conn, &res, options->query_auth, service, user, passwd, rhost) == PAM_SUCCESS) {
-		if(PQntuples(res) == 0) {
+	if (pg_execParam(conn, &res, options->query_auth, service, user, passwd, rhost) == PAM_SUCCESS) {
+		row_count = PQntuples(res);
+		if (row_count == 0) {
 			rc = PAM_USER_UNKNOWN;
-		} else if (!PQgetisnull(res, 0, 0)) {
-			char *stored_pw = PQgetvalue(res, 0, 0);
-			if (options->pw_type == PW_FUNCTION) {
-				if (!strcmp(stored_pw, "t")) { rc = PAM_SUCCESS; }
-			} else {
-				if (!strcmp(stored_pw, (tmp = password_encrypt(options, user, passwd, stored_pw)))) rc = PAM_SUCCESS;
-				free (tmp);
+		} else {
+			for (int i = 0; i < row_count && rc != PAM_SUCCESS; i++) {
+				if (!PQgetisnull(res, i, 0)) {
+					char *stored_pw = PQgetvalue(res, i, 0);
+					if (options->pw_type == PW_FUNCTION) {
+						if (!strcmp(stored_pw, "t")) {
+							rc = PAM_SUCCESS;
+						}
+					} else {
+						tmp = password_encrypt(options, user, passwd, stored_pw);
+						if (!strcmp(stored_pw, tmp)) {
+							rc = PAM_SUCCESS;
+						}
+						free (tmp);
+					}
+				}
 			}
 		}
 		PQclear(res);
