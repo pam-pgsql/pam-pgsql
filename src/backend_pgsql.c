@@ -270,7 +270,7 @@ backend_authenticate(const char *service, const char *user, const char *passwd, 
 						}
 					} else {
 						tmp = password_encrypt(options, user, passwd, stored_pw);
-						if (!strcmp(stored_pw, tmp)) {
+						if (tmp != NULL && !strcmp(stored_pw, tmp)) {
 							rc = PAM_SUCCESS;
 						}
 						free (tmp);
@@ -293,12 +293,17 @@ password_encrypt(modopt_t *options, const char *user, const char *pass, const ch
 	switch(options->pw_type) {
 		case PW_CRYPT:
 		case PW_CRYPT_MD5:
-		case PW_CRYPT_SHA512: 
+		case PW_CRYPT_SHA512: {
+			char *c = NULL;
 			if (salt==NULL) {
-				s = strdup(crypt(pass, crypt_makesalt(options->pw_type)));
+				c = crypt(pass, crypt_makesalt(options->pw_type));
 			} else {
-				s = strdup(crypt(pass, salt));
+				c = crypt(pass, salt);
 			}
+			if (c!=NULL) {
+				s = strdup(c);
+			}
+		}
 		break;
 		case PW_MD5: {
 			unsigned char hash[16] = { 0, }; /* 16 is the md5 block size */
