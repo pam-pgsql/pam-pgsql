@@ -8,7 +8,6 @@
  * William Grzybowski <william@agencialivre.com.br>
  */
 
-#define _XOPEN_SOURCE 500
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -22,9 +21,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <netdb.h>
+#include <sys/socket.h>
 #include <arpa/inet.h>
 
+#ifdef HAVE_CRYPT_H
 #include <crypt.h>
+#endif
 #include <gcrypt.h>
 
 #include "backend_pgsql.h"
@@ -111,7 +113,8 @@ expand_query (char **command, const char** values, const char *query, const char
 	/* Compute resulting query length */
 	for (len = 0, p = (char *) query; *p; ) {
 		if (*p == '%') {
-			if (p[1] == 'u' || p[1] == 'p' || p[1] == 's') {
+			if (p[1] == 'u' || p[1] == 'p' || p[1] == 's' ||
+			    p[1] == 'h' || p[1] == 'i') {
 				len += 4; /*we allow 128 tokens max*/
 				p += 2;
 				continue;
